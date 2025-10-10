@@ -7,20 +7,12 @@ import Footer from "@/components/langing/Footer";
 import { useLogin } from "@/hooks/useLogin";
 import { getUser } from "@/services/auth";
 
-function Login() {
+export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
-  const searchParams = useSearchParams();
   const router = useRouter();
 
   // --- Sanitize redirect path ---
-  const redirectParam = searchParams.get("redirect");
-  const redirectPath =
-    redirectParam &&
-    redirectParam.startsWith("/") &&
-    !redirectParam.startsWith("//")
-      ? redirectParam
-      : "/";
 
   const { mutateAsync: login, isPending: isLoading } = useLogin();
 
@@ -61,11 +53,10 @@ function Login() {
     }
 
     try {
-      // --- Attempt login ---
       const res = await login({
         email: form.email.trim(),
         password: form.password,
-        redirect: redirectPath,
+        redirect: "",
       });
 
       if (!res?.success) {
@@ -80,12 +71,6 @@ function Login() {
 
       if (!user?.role) {
         setError("Could not verify session. Please try again.");
-        return;
-      }
-
-      // --- Role-based redirect ---
-      if (redirectPath !== "/") {
-        router.push(redirectPath);
         return;
       }
 
@@ -170,13 +155,5 @@ function Login() {
 
       <Footer />
     </div>
-  );
-}
-
-export default function Page() {
-  return (
-    <Suspense fallback={<div></div>}>
-      <Login />
-    </Suspense>
   );
 }
