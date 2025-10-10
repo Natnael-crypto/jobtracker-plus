@@ -1,19 +1,22 @@
 import { cookies } from "next/headers";
-import axios from "./axios";
 import { redirect } from "next/navigation";
 import https from "https";
+import axios from "axios";
 
 export async function requireRole(role: "admin" | "client" | "business") {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const cookieHeader = cookieStore.toString();
 
     const agent = new https.Agent({ rejectUnauthorized: false });
 
-    const res = await axios.get("/user", {
-      headers: { Cookie: cookieHeader },
-      httpsAgent: agent,
-    });
+    const res = await axios.get(
+      "https://jobtracker-lb-477288342.eu-north-1.elb.amazonaws.com/api/user",
+      {
+        headers: { Cookie: cookieHeader },
+        httpsAgent: agent,
+      }
+    );
 
     if (!res.data.success) {
       console.error(
