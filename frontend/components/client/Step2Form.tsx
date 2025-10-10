@@ -39,7 +39,7 @@ export const RadioOption: React.FC<RadioOptionProps> = ({
 );
 
 const API_URL = "https://autocomplete.search.hereapi.com/v1/autocomplete";
-const API_KEY = process.env.NEXT_PUBLIC_HERE_API_KEY as string;
+const API_KEY = "g5fjfHaWQ6gq3O2wBMn3kCN6IYq7t0BIvfzRF6ZZ6wQ" as string;
 
 interface AddressItem {
   id: string;
