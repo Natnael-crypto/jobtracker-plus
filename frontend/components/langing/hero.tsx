@@ -179,13 +179,11 @@ const HeroSection = () => {
           <div className="flex justify-center">
             <div className="flex space-x-4 px-4 sm:px-6 lg:px-8 overflow-x-auto scrollbar-hide">
               {AllServices.map((category, index) => {
-                const IconComponent = icons[category] || Wrench; // default fallback
                 return (
                   <button
                     key={index}
                     className="flex items-center space-x-2 border border-gray-200 py-3 px-4 rounded-full text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition duration-150 flex-shrink-0"
                   >
-                    <IconComponent className="text-gray-500 w-4 h-4" />
                     <span>{category}</span>
                   </button>
                 );
