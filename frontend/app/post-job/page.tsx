@@ -12,6 +12,8 @@ import Footer from "@/components/langing/Footer";
 import { v4 as uuidv4 } from "uuid";
 import { useUser, useSignUp, useLogin } from "@/hooks/useLogin";
 import api from "@/lib/axios";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -250,6 +252,9 @@ export default function JobCreateForm() {
     }
   }, [data.step, user, userError]);
 
+  const totalSteps = 3;
+  const progress = Math.min((data.step / totalSteps) * 100, 100);
+
   // ---- RENDER ----
   return (
     <div className="min-h-screen p-8 mt-12">
@@ -427,26 +432,42 @@ export default function JobCreateForm() {
         ) : (
           <>
             {/* ---- MAIN FORM ---- */}
-            <div className="mb-8 flex items-center justify-between">
-              <div className="flex items-center">
-                {data.step <= 4 && (
-                  <button
-                    onClick={prevStep}
-                    className="p-2 mr-4 rounded-full hover:bg-gray-200 transition-colors"
-                  >
-                    <ChevronLeft size={24} className="text-gray-800" />
-                  </button>
-                )}
-                <h1 className="text-xl font-medium text-gray-800">
-                  {data.step < 4 ? `Step ${data.step} of 3` : stepTitle}
-                </h1>
+            <div className="mb-8 space-y-4">
+              {/* Header Row */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  {data.step <= totalSteps && data.step > 1 && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={prevStep}
+                      className="rounded-full hover:bg-gray-100"
+                    >
+                      <ChevronLeft className="text-gray-700" size={22} />
+                    </Button>
+                  )}
+
+                  <h1 className="ml-3 text-xl font-semibold text-gray-800">
+                    {data.step <= totalSteps
+                      ? `Step ${data.step} of ${totalSteps}`
+                      : stepTitle}
+                  </h1>
+                </div>
+
+                <Button
+                  variant="outline"
+                  onClick={clearForm}
+                  className="text-gray-700 border-gray-300 hover:bg-gray-100"
+                >
+                  Clear Form
+                </Button>
               </div>
-              <button
-                onClick={clearForm}
-                className="px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 transition-colors"
-              >
-                Clear Form
-              </button>
+
+              {/* Progress Bar */}
+              <Progress
+                value={progress}
+                className="h-2 bg-gray-200 [&>div]:bg-green-500 rounded-full"
+              />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
