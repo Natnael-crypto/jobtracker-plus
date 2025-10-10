@@ -1,0 +1,45 @@
+
+sudo docker run -d \
+  --name pn-frontend \
+  -p 80:3000 \
+  --restart unless-stopped \
+  natnaelcrypto/job-market-place-frontend:latest
+
+
+
+sudo docker run -d \
+  --name pn-backend \
+  -p 80:8080 \
+  --restart unless-stopped \
+  -e STRIPE_SECRET_KEY="sk_test_51RhlMUIRNrA45RkFXppGv1Mdz6duUPKWRaRpuCVmknKLEckjeUdVB6gscE8CkNwOUGsiEYaMGCKzhG8ywl78Sozp00KT24joyJ" \
+  -e STRIPE_WEBHOOK_SECRET="whsec_X7M06EnJdQ0qa3FSA000N2joF8hwLz1j" \
+  -e STRIPE_PUBLISHABLE_KEY="pk_test_51RhlMUIRNrA45RkFYyuY1t5udof1ckw1No5W8HWVZ1zHAMDh4r0Sm8dPoNJwR7P9QOJgMHELpPy9xBcpUcTcaxC900wsIEqp8R" \
+  -e FRONTEND_URL="https://www.pollsnation.com" \
+  -e BACKEND_URL="https://www.pollsnation.com" \
+  -e DATABASE_HOST="database-2.c7iqgq6qszvc.eu-north-1.rds.amazonaws.com" \
+  -e DATABASE_PORT="5432" \
+  -e DATABASE_USER="polls_nation" \
+  -e DATABASE_PASSWORD="this21_worksfine" \
+  -e DATABASE_DBNAME="polls_nation" \
+  -e DATABASE_SSLMODE="require" \
+  -e REDIS_URL="rediss://pollsnation-m6bk6b.serverless.eun1.cache.amazonaws.com:6379" \
+  -e JWT_SECRET_KEY="akjndakjndkajndkjandkjaeixdjwkjskdahcifuhaicufhaifufhs" \
+  -e JWT_EXPIRESINHOUR="12h" \
+  -e SERVER_PORT="8080" \
+  -e SERVER_DEBUG="false" \
+  -e SERVER_READ_TIMEOUT="10s" \
+  -e SERVER_WRITE_TIMEOUT="15s" \
+  -e CLIENT_ID="245973368664-s2geomberv8sak8sra7ij1htvo7q4kpl.apps.googleusercontent.com" \
+  -e CLIENT_SECRET="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" \
+  -e REDIRECT_URL="https://www.pollsnation.com/api/v1/auth/google/callback" \
+  -e SESSION_SECRET="sajkndsajnldjnasljdnkajndkjasndahdyuwfbcnrywus" \
+  -e AWS_ACCESS_KEY_ID="AKIA4CH67KOO33IZ4ZGK" \
+  -e AWS_SECRET_ACCESS_KEY="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" \
+  -e AWS_REGION="eu-north-1" \
+  -e AWS_BUCKET="pollsnation" \
+  -e SMTP_SERVER="smtp.elasticemail.com" \
+  -e SMTP_PORT="2525" \
+  -e SMTP_USERNAME="mail2@pollsnation.com" \
+  -e SMTP_PASSWORD="388EB08DCEA01E1EE385DB2ABB3C398AAD45" \
+  -e SMTP_FROM="mail@pollsnation.com" \
+  natnaelcrypto/job-market-place-backend:latest

@@ -118,6 +118,12 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	// TODO Add Authorization
 
 	api := r.Group("/api")
+	api.GET("", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
+
 	api.POST("/register", userHandler.Register) //Tested
 	api.POST("/login", userHandler.Login)       //Tested
 	api.POST("/logout", userHandler.Logout)     //Tested
