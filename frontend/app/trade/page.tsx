@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, {
+  useState,
+  useMemo,
+  useCallback,
+  useEffect,
+  Suspense,
+} from "react";
 import { Search, ChevronDown, Filter, User, Star, MapPin } from "lucide-react";
 import TopNav from "@/components/langing/top";
 import Footer from "@/components/langing/Footer";
@@ -392,4 +398,10 @@ const TradePersonListing: React.FC = () => {
   );
 };
 
-export default TradePersonListing;
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading trades...</div>}>
+      <TradePersonListing />
+    </Suspense>
+  );
+}

@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import TopNav from "@/components/langing/top";
 import Footer from "@/components/langing/Footer";
 import { useLogin } from "@/hooks/useLogin";
 import { getUser } from "@/services/auth";
 
-export default function Login() {
+function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const searchParams = useSearchParams();
@@ -170,5 +170,13 @@ export default function Login() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div></div>}>
+      <Login />
+    </Suspense>
   );
 }

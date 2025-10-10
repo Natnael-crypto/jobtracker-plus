@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import BusinessSidebar from "@/components/business/sidebar";
 import TopNav from "@/components/business/topnav";
 import { requireRole } from "@/lib/guards";
