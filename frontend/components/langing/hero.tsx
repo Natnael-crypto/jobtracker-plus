@@ -1,5 +1,6 @@
 import React from "react";
 import { Button } from "../ui/button";
+import { AllServices } from "@/data/services";
 
 const ArrowRight = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -120,19 +121,6 @@ const icons: { [key: string]: React.FC<React.SVGProps<SVGSVGElement>> } = {
   Carpenter: Hammer,
 };
 
-const categories = [
-  "Plumber",
-  "Handyman",
-  "Gardening",
-  "Painter",
-  "Handyman",
-  "Plumber",
-  "Electrician",
-  "Carpenter",
-  "Painter",
-  "Handyman",
-];
-
 const HeroSection = () => {
   return (
     <div className="bg-white text-gray-800">
@@ -190,7 +178,7 @@ const HeroSection = () => {
         <div className="py-12 border-t border-b border-gray-100 my-12">
           <div className="flex justify-center">
             <div className="flex space-x-4 px-4 sm:px-6 lg:px-8 overflow-x-auto scrollbar-hide">
-              {categories.map((category, index) => {
+              {AllServices.map((category, index) => {
                 const IconComponent = icons[category] || Wrench; // default fallback
                 return (
                   <button
