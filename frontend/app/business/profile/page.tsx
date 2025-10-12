@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import ServiceDetailsSection from "@/components/business/ServiceDetailsSection";
 import QualificationsPage from "@/components/business/QualificationsPage";
 import AccountClosureSection from "@/components/business/AccountClosureSection";
@@ -22,12 +22,25 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useSearchParams } from "next/navigation";
+import VerificationReviewPopup from "@/components/business/VerificationReviewPopup";
 
 const ProfileSection: React.FC = () => {
+  const idVerificationParams = useSearchParams();
+  const [idVerificationStatus, setIdVerificationStatus] = useState("");
   const { mutate: createVerificationSession } = useCreateVerificationSession();
   const { data: verified } = useVerified();
+
+  useEffect(() => {
+    const serviceQuery = idVerificationParams.get("status");
+    if (serviceQuery && serviceQuery !== idVerificationStatus) {
+      setIdVerificationStatus(serviceQuery);
+    }
+  }, [idVerificationParams]);
+
   return (
     <div className="">
+      <VerificationReviewPopup show={idVerificationStatus == "In Review"} />
       <div className="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8 space-y-8">
         <header className="mb-8">
           <div className="flex items-center justify-between">
@@ -103,4 +116,10 @@ const ProfileSection: React.FC = () => {
   );
 };
 
-export default ProfileSection;
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading trades...</div>}>
+      <ProfileSection />
+    </Suspense>
+  );
+}

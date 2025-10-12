@@ -36,7 +36,7 @@ func (s *VerificationService) CreateVerificationSession(userID string) (*CreateS
 		"metadata": map[string]string{
 			"user_id": userID,
 		},
-		"callback":    s.Conf.BaseUrl.BackEndUrl + "/api/verification/webhook",
+		"callback":    s.Conf.BaseUrl.BackEndUrl + "/business/profile",
 		"workflow_id": s.Conf.Didit.WorkFlow,
 	}
 
