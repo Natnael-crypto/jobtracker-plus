@@ -664,6 +664,18 @@ export const Services = [
       },
     ],
   },
+  {
+    id: "mover",
+    name: "Mover",
+    description: "Moving services",
+    subcategories: [
+      {
+        id: "mover",
+        name: "Mover",
+        description: "Moving services",
+      },
+    ],
+  },
 ];
 
 export const AllServices = [
@@ -681,5 +693,6 @@ export const AllServices = [
   "Plumbing",
   "Roofing",
   "Tiling",
+  "Mover",
   "Other Services",
 ];

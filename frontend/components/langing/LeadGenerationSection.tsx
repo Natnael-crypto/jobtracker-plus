@@ -1,16 +1,8 @@
 import React from "react";
 import { Check, ArrowRight } from "lucide-react";
+import { AllServices } from "@/data/services";
 
-// Data structure for the trade list footer section
-const trades = [
-  "Electrician",
-  "Gardening",
-  "Painting and decorating",
-  "Plumbing",
-  "Packers and movers",
-  "Kitchen fitter",
-];
-
+// ✅ Reusable feature item
 const FeatureItem: React.FC<{ text: string }> = ({ text }) => (
   <div className="flex items-center space-x-3 py-1.5">
     <Check className="w-5 h-5 text-gray-800 flex-shrink-0" />
@@ -18,22 +10,29 @@ const FeatureItem: React.FC<{ text: string }> = ({ text }) => (
   </div>
 );
 
+// ✅ Utility function to split array into chunks
+function chunkArray<T>(array: T[], chunks: number): T[][] {
+  const perChunk = Math.ceil(array.length / chunks);
+  const result: T[][] = [];
+  for (let i = 0; i < array.length; i += perChunk) {
+    result.push(array.slice(i, i + perChunk));
+  }
+  return result;
+}
+
 const LeadGenerationSection: React.FC = () => {
   const columns = 4;
 
-  const tradeColumns = Array(columns).fill(trades);
+  // ✅ Divide services evenly into 4 columns
+  const tradeColumns = chunkArray(AllServices, columns);
 
   return (
     <section className="font-sans antialiased bg-white p-4 sm:p-8 lg:p-12">
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col lg:flex-row bg-white rounded-xl  overflow-hidden mb-16 lg:mb-24">
+        {/* Hero Section */}
+        <div className="flex flex-col lg:flex-row bg-white rounded-xl overflow-hidden mb-16 lg:mb-24">
           <div className="lg:w-1/2 flex-shrink-0">
-            <div
-              className="w-full h-80 lg:h-full bg-cover bg-center"
-              style={{
-                backgroundImage: 'url("/pricing.svg")',
-              }}
-            >
+            <div className="w-full h-80 lg:h-full bg-cover bg-center">
               <img
                 src="/pricing.svg"
                 alt="Construction worker talking on phone"
@@ -51,7 +50,7 @@ const LeadGenerationSection: React.FC = () => {
               Grow your business with BWC. BWC is the reliable way to get more
               of the work you want! Sign up for free to receive a steady stream
               of local job opportunities that match your skills. Take on big
-              jobs or smaller gap fillers - it&apos;s up to you.
+              jobs or smaller gap fillers — it&apos;s up to you.
             </p>
 
             <div className="space-y-2 mb-10 sm:mb-12">
@@ -71,20 +70,21 @@ const LeadGenerationSection: React.FC = () => {
           </div>
         </div>
 
+        {/* Services Section */}
         <div className="mt-12">
           <h3 className="text-2xl font-bold text-gray-900 mb-8 sm:mb-12">
             Any trade, anytime, anywhere
           </h3>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-4 gap-x-8 lg:gap-x-12">
-            {tradeColumns.map((columnTrades, columnIndex) => (
-              <div key={columnIndex} className="space-y-3">
-                {columnTrades.map((trade: string, tradeIndex: number) => (
+            {tradeColumns.map((columnTrades, colIndex) => (
+              <div key={colIndex} className="space-y-3">
+                {columnTrades.map((trade: any, tradeIndex: number) => (
                   <p
                     key={tradeIndex}
-                    className="text-base text-gray-600 hover:text-gray-900 cursor-pointer"
+                    className="text-base text-gray-600 hover:text-gray-900 cursor-pointer transition-colors"
                   >
-                    {trade}
+                    {typeof trade === "string" ? trade : trade.name}
                   </p>
                 ))}
               </div>

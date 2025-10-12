@@ -82,3 +82,14 @@ export interface UserProfileResponse {
   portfolio: Portfolio[];
   business_introduction: BusinessIntroduction;
 }
+
+export interface ProfileStat {
+  Email: boolean;
+  Identity: boolean;
+  ProfileImage: boolean;
+  Address: boolean;
+  AboutMe: boolean;
+  Qualifications: boolean;
+  Services: boolean;
+  Portfolio: boolean;
+}

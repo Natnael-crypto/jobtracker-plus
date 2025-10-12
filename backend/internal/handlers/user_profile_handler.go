@@ -88,3 +88,13 @@ func (h *UserProfileHandler) GetUserProfile(c *gin.Context) {
 
 	c.JSON(http.StatusOK, data)
 }
+
+func (h *UserProfileHandler) GetProfileStat(c *gin.Context) {
+	userID := c.GetString("userID")
+	stat, err := h.Service.ProfileStat(userID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user profile not found"})
+		return
+	}
+	c.JSON(http.StatusOK, stat)
+}

@@ -20,6 +20,7 @@ type Config struct {
 	Stripe   Stripe
 	Email    SMTPConfig
 	Geocode  GeocodeConfig
+	Didit    DiditConfig
 }
 
 type GeocodeConfig struct {
@@ -37,6 +38,13 @@ type GoogleConfig struct {
 	ClientID     string
 	ClientSecret string
 	RedirectURL  string
+}
+
+type DiditConfig struct {
+	ApiKey   string
+	AppId    string
+	Secret   string
+	WorkFlow string
 }
 
 type ServerConfig struct {
@@ -165,6 +173,12 @@ func LoadConfig() (*Config, error) {
 		},
 		Geocode: GeocodeConfig{
 			APIKey: viper.GetString("GEOCODE_API_KEY"),
+		},
+		Didit: DiditConfig{
+			ApiKey:   viper.GetString("DIDIT_API_KEY"),
+			AppId:    viper.GetString("DIDIT_APP_ID"),
+			Secret:   viper.GetString("DIDIT_SECRET"),
+			WorkFlow: viper.GetString("DIDIT_WORKFLOW"),
 		},
 	}
 

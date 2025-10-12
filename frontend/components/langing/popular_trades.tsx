@@ -1,3 +1,5 @@
+"use client";
+
 import React, { FC } from "react";
 
 interface Trade {
@@ -20,10 +22,15 @@ const IconMap: { [key: string]: string } = {
 const TradeCard: FC<{ trade: Trade }> = ({ trade }) => {
   const IconComponent = IconMap[trade.icon];
 
+  const onClick = () => {
+    window.location.href = "/trade?service=" + trade.name;
+  };
+
   return (
     <div
       className="flex flex-col items-center justify-center p-6 sm:p-8 rounded-2xl transition-all cursor-pointer hover:shadow-lg h-36 w-full"
       style={{ backgroundColor: CARD_BG, cursor: "pointer" }}
+      onClick={onClick}
     >
       <div className="mb-3">
         <img src={IconComponent} alt="" />
@@ -37,11 +44,11 @@ const TradeCard: FC<{ trade: Trade }> = ({ trade }) => {
 
 const popularTradesData: Trade[] = [
   { name: "Handyman", icon: "Drill" },
-  { name: "Gardening", icon: "Shovel" },
-  { name: "Decorating", icon: "Roller" },
+  { name: "Gardening & Landscaping", icon: "Shovel" },
+  { name: "Painting & Decorating", icon: "Roller" },
   { name: "Plumbing", icon: "Tap" },
   { name: "Mover", icon: "Truck" },
-  { name: "Joinery", icon: "Axe" },
+  { name: "Carpentry & Joinery", icon: "Axe" },
 ];
 
 export default function PopularTrades() {

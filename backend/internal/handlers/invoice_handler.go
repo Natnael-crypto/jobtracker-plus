@@ -127,7 +127,7 @@ func (h *InvoiceHandler) GetAllUserInvoices(c *gin.Context) {
 }
 
 func (h *InvoiceHandler) GetByInvoiceForClient(c *gin.Context) {
-	userID := c.Param("user_id")
+	userID := c.GetString("userID")
 	id := c.Param("job_id")
 	invoice, err := h.service.GetByUserIdJobId(c, userID, id)
 	if err != nil {
@@ -149,7 +149,7 @@ func (h *InvoiceHandler) DeleteByInvoice(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-func (h *InvoiceHandler) Update(c *gin.Context) {
+func (h *InvoiceHandler) Update(c *gin.Context) {   
 	id := c.Param("id")
 	var req struct {
 		Status string `json:"status"`

@@ -10,29 +10,92 @@ import { ProfileDetailsSection } from "@/components/common/ProfileDetailsSection
 import AboutMe from "@/components/business/AboutMe";
 import AddressAutocomplete from "@/components/common/AddressAutocomplete";
 import JobRadius from "@/components/common/JobRange";
+import { Button } from "@/components/ui/button";
+import {
+  useCreateVerificationSession,
+  useVerified,
+} from "@/hooks/useUserProfile";
+import { BadgeAlert, BadgeCheck } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const ProfileSection: React.FC = () => {
+  const { mutate: createVerificationSession } = useCreateVerificationSession();
+  const { data: verified } = useVerified();
   return (
     <div className="">
       <div className="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8 space-y-8">
         <header className="mb-8">
-          <h1 className="text-3xl font-semibold text-gray-900">My Profile</h1>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <h1 className="text-3xl font-semibold text-gray-900">
+                My Profile
+              </h1>
+
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    {verified?.verified ? (
+                      <BadgeCheck className="w-6 h-6 ml-2 text-green-600 cursor-pointer" />
+                    ) : (
+                      <BadgeAlert className="w-6 h-6 ml-2 text-red-600 cursor-pointer" />
+                    )}
+                  </TooltipTrigger>
+                  <TooltipContent
+                    className={`bg-white text-green-600 text-sm rounded-md px-3 py-2 border-1 border-green-600 ${
+                      !verified?.verified && "text-red-600 border-red-600"
+                    }`}
+                  >
+                    {verified?.verified
+                      ? "Your identity is verified. You have full access to all features."
+                      : "Your account is not verified yet. Please complete verification to unlock all features."}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            {verified != undefined && verified?.verified === false && (
+              <Button
+                onClick={() => createVerificationSession()}
+                className="bg-green-600 hover:bg-green-700 text-white w-[150px] py-2 rounded-md font-semibold"
+              >
+                Verify Identity
+              </Button>
+            )}
+          </div>
 
           <div className="border-t border-gray-200 mt-6" />
         </header>
 
-        <ProfileDetailsSection />
-        <AddressAutocomplete />
+        <div id="ProfileImage">
+          <ProfileDetailsSection />
+        </div>
+        <div id="Address">
+          <AddressAutocomplete />
+        </div>
 
-        <JobRadius />
+        <div id="job-radius">
+          <JobRadius />
+        </div>
 
-        <AboutMe />
+        <div id="AboutMe">
+          <AboutMe />
+        </div>
 
-        <ServiceDetailsSection />
+        <div id="Services">
+          <ServiceDetailsSection />
+        </div>
 
-        <QualificationsPage />
+        <div id="Qualifications">
+          <QualificationsPage />
+        </div>
 
-        <Portfolio />
+        <div id="Portfolio">
+          <Portfolio />
+        </div>
         <ChangePasswordSection />
         <AccountClosureSection />
       </div>

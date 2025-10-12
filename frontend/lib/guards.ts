@@ -11,7 +11,8 @@ export async function requireRole(role: "admin" | "client" | "business") {
     const agent = new https.Agent({ rejectUnauthorized: false });
 
     const res = await axios.get(
-      "https://jobtracker-lb-477288342.eu-north-1.elb.amazonaws.com/api/user",
+      process.env.NEXT_PUBLIC_API_URL + "/user" ||
+        "https://jobtracker-lb-477288342.eu-north-1.elb.amazonaws.com/api/user",
       {
         headers: { Cookie: cookieHeader },
         httpsAgent: agent,

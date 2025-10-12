@@ -28,5 +28,9 @@ func (r *jobAddressRepository) GetByJobID(jobID string) (*models.JobAddress, err
 	if err := r.db.Where("job_id = ?", jobID).First(&address).Error; err != nil {
 		return nil, err
 	}
+	address.Zip = ""
+	address.Latitude = 0.0
+	address.Longitude = 0.0
+	address.Street = ""
 	return &address, nil
 }

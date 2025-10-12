@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import ProfileSetupStatus from "@/components/business/ProfileSetupStatus";
 import BusinessSidebar from "@/components/business/sidebar";
 import TopNav from "@/components/business/topnav";
 import { requireRole } from "@/lib/guards";
@@ -18,6 +19,7 @@ export default async function BusinessLayout({
 
       <div className="flex flex-col flex-grow">
         <TopNav />
+        <ProfileSetupStatus />
         <div className="flex-1 overflow-y-auto ">{children}</div>
       </div>
     </div>

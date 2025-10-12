@@ -115,6 +115,18 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	business_users_repo := repositories.NewProviderRepository(db)
 	business_users_handler := handlers.NewProviderHandler(business_users_repo)
 
+	question_repo := repositories.NewQuestionRepo(db)
+	question_service := services.NewQuestionService(question_repo)
+	question_handler := handlers.NewQuestionHandler(question_service)
+
+	answer_repo := repositories.NewAnswerRepo(db)
+	answer_service := services.NewAnswerService(answer_repo)
+	answer_handler := handlers.NewAnswerHandler(answer_service)
+
+	verification_repo := repositories.NewUserVerificationRepository(db)
+	verification_service := services.NewVerificationService(verification_repo, *cfg)
+	verification_handler := handlers.NewVerificationHandler(verification_service, cfg.BaseUrl.FrontEndUrl)
+
 	// TODO Add Authorization
 
 	api := r.Group("/api")
@@ -147,6 +159,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 		user.GET("/profile", user_profile_handler.GetProfile)                //Tested
 		user.PUT("/profile", user_profile_handler.UpdateProfile)             //Tested
 		user.POST("/profile/image", user_profile_handler.UploadProfileImage) //Tested
+		user.GET("/profile/stat", user_profile_handler.GetProfileStat)
 
 		user.GET("/address", user_address_handler.GetAddress)
 		user.PUT("/address", user_address_handler.UpdateAddress)
@@ -200,8 +213,12 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 
 		business.GET("/invitations/:user_id", job_invitation_handler.GetInvitationsByUser)
 		business.PUT("/invitations/:id/status", job_invitation_handler.UpdateInvitationStatus)
+
+		business.POST("/verification/session", verification_handler.CreateSession)
+		business.GET("/verification/verify", verification_handler.Verify)
 	}
 
+	api.POST("/verification/webhook", verification_handler.Webhook)
 	api.GET("/business/services/:user_id", service_handler.GetServices)
 	api.GET("/business/qualifications/:user_id", qualification_handler.GetUserQualifications)
 	api.GET("/business/introduction/:user_id", business_introduction_handler.GetIntroduction)
@@ -300,8 +317,8 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 		invoice.GET("/client/:job_id/:user_id", invoice_handler.GetByInvoiceForClient)
 		invoice.GET("/business/:job_id", invoice_handler.GetByInvoiceForBusiness)
 		invoice.DELETE("/:id", invoice_handler.DeleteByInvoice)
-		invoice.PUT("/:id", invoice_handler.Update)
-		invoice.GET("/:id", invoice_handler.GetById)
+		invoice.PUT("/:id", invoice_handler.Update)  // Need Update
+		invoice.GET("/:id", invoice_handler.GetById) //Need Test
 		invoice.GET("/all", invoice_handler.GetAllUserInvoices)
 	}
 
@@ -309,6 +326,25 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	{
 		services.GET("", business_users_handler.ListProviders)
 		services.GET("/:user_id", business_users_handler.GetProvider)
+	}
+
+	questions := api.Group("/questions")
+	questions.Use(middleware.AuthMiddleware(cfg.JWT.SecretKey))
+	{
+		questions.POST("", question_handler.Create)
+		questions.DELETE("/:id", question_handler.Delete)
+		questions.GET("/:id", question_handler.GetByID)
+		questions.GET("", question_handler.List)
+	}
+
+	answers := api.Group("/answers")
+	answers.Use(middleware.AuthMiddleware(cfg.JWT.SecretKey), middleware.AnonIDMiddleware())
+	{
+		answers.POST("/:qid", answer_handler.Create)
+		answers.DELETE("/:id", answer_handler.Delete)
+		answers.GET("/:id", answer_handler.GetByID)
+		answers.GET("/question/:qid", answer_handler.List)
+		answers.PUT("/:id", answer_handler.Like)
 	}
 
 	return r

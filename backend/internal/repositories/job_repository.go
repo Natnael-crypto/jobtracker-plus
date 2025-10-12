@@ -104,6 +104,19 @@ func (r *jobRepository) GetJobsInRange(userID string, page, limit int) ([]models
 		return []models.Job{}, 0, nil
 	}
 
+	var services []models.Service
+	if err := r.db.Where("user_id = ?", userID).Find(&services).Error; err != nil {
+		return []models.Job{}, 0, nil
+	}
+	servicesList := make([]string, len(services))
+	for i, service := range services {
+		servicesList[i] = service.ServiceName
+	}
+
+	if len(servicesList) == 0 {
+		return []models.Job{}, 0, nil
+	}
+
 	radiusKm := float64(businessRange.RangeKm)
 	lat, lon := userAddress.Latitude, userAddress.Longitude
 	latRadius := radiusKm / 111.0
@@ -114,19 +127,18 @@ func (r *jobRepository) GetJobsInRange(userID string, page, limit int) ([]models
 	minLon := lon - lonRadius
 	maxLon := lon + lonRadius
 
-	// --- count total jobs first ---
 	var total int64
 	err := r.db.Table("jobs").
 		Joins("JOIN job_addresses ja ON ja.job_id = jobs.id").
 		Where("jobs.status = ?", "open").
 		Where("ja.latitude BETWEEN ? AND ?", minLat, maxLat).
 		Where("ja.longitude BETWEEN ? AND ?", minLon, maxLon).
+		Where("jobs.service_category IN ?", servicesList).
 		Count(&total).Error
 	if err != nil {
 		return []models.Job{}, 0, nil
 	}
 
-	// --- fetch jobs with pagination ---
 	var jobs []models.Job
 	offset := (page - 1) * limit
 
@@ -136,6 +148,8 @@ func (r *jobRepository) GetJobsInRange(userID string, page, limit int) ([]models
 		Where("jobs.status = ?", "open").
 		Where("ja.latitude BETWEEN ? AND ?", minLat, maxLat).
 		Where("ja.longitude BETWEEN ? AND ?", minLon, maxLon).
+		Where("jobs.service_category IN ?", servicesList).
+		Order("jobs.created_at DESC").
 		Limit(limit).
 		Offset(offset).
 		Scan(&jobs).Error
@@ -143,7 +157,6 @@ func (r *jobRepository) GetJobsInRange(userID string, page, limit int) ([]models
 		return []models.Job{}, 0, nil
 	}
 
-	// --- filter by exact distance ---
 	filteredJobs := make([]models.Job, 0, len(jobs))
 	for _, job := range jobs {
 		var addr models.JobAddress

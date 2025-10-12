@@ -94,3 +94,94 @@ func (r *UserProfileRepository) GetBusinessIntroduction(userID string) (*models.
 	}
 	return &intro, nil
 }
+
+type ProfileStatsResponse struct {
+	Identity       bool
+	Email          bool
+	ProfileImage   bool
+	Address        bool
+	AboutMe        bool
+	Services       bool
+	Qualifications bool
+	Portfolio      bool
+}
+
+func (r *UserProfileRepository) ProfileStatus(userID string) (*ProfileStatsResponse, error) {
+	var profileStat ProfileStatsResponse
+	var profile *models.UserProfile
+	var address models.UserAddress
+	var aboutMe models.BusinessIntroduction
+	var services []models.Service
+	var qualifications []models.Qualification
+	var portfolio []models.Portfolio
+	var Identity models.UserVerification
+	var Email models.UserVerification
+
+	profile, err := r.GetByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	if profile.ImageURL != "" {
+		profileStat.ProfileImage = true
+	}
+
+	if err := r.DB.Where("user_id = ? AND type = 'identity'", userID).First(&Identity).Error; err != nil {
+		profileStat.Identity = false
+	} else {
+		if !Identity.Verified {
+			profileStat.Identity = false
+		}
+		profileStat.Identity = true
+	}
+
+	if err := r.DB.Where("user_id = ? AND type = 'email'", userID).First(&Email).Error; err != nil {
+		profileStat.Email = false
+	} else {
+		if !Email.Verified {
+			profileStat.Email = false
+		}
+		profileStat.Email = true
+	}
+
+	if err := r.DB.Where("user_id = ?", userID).First(&address).Error; err != nil {
+		profileStat.Address = false
+	} else {
+		profileStat.Address = true
+	}
+	if err := r.DB.Where("user_id = ?", userID).First(&aboutMe).Error; err != nil {
+		profileStat.AboutMe = false
+	} else {
+		profileStat.AboutMe = true
+	}
+	if err := r.DB.Where("user_id = ?", userID).Find(&services).Error; err != nil {
+		profileStat.Services = false
+	} else {
+		if len(services) == 0 {
+			profileStat.Services = false
+		} else {
+			profileStat.Services = true
+
+		}
+	}
+	if err := r.DB.Where("user_id = ?", userID).Find(&qualifications).Error; err != nil {
+		profileStat.Qualifications = false
+	} else {
+		if len(qualifications) == 0 {
+			profileStat.Qualifications = false
+		} else {
+			profileStat.Qualifications = true
+		}
+	}
+	if err := r.DB.Where("user_id = ?", userID).Find(&portfolio).Error; err != nil {
+		profileStat.Portfolio = false
+	} else {
+		if len(portfolio) == 0 {
+			profileStat.Portfolio = false
+		} else {
+			profileStat.Portfolio = true
+		}
+	}
+
+	return &profileStat, nil
+}

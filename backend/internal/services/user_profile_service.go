@@ -162,3 +162,7 @@ func (s *UserProfileService) GetUserProfileData(userID string) (*models.UserProf
 		BusinessIntroduction: intro,
 	}, nil
 }
+
+func (s *UserProfileService) ProfileStat(userID string) (*repositories.ProfileStatsResponse, error) {
+	return s.Repo.ProfileStatus(userID)
+}
