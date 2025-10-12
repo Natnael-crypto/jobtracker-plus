@@ -42,4 +42,11 @@ sudo docker run -d \
   -e SMTP_PASSWORD="388EB08DCEA01E1EE385DB2ABB3C398AAD45" \
   -e SMTP_FROM="mail@pollsnation.com" \
   -e GEOCODE_API_KEY="g5fjfHaWQ6gq3O2wBMn3kCN6IYq7t0BIvfzRF6ZZ6wQ" \
+  -e DIDIT_API_KEY="C9PGxBqEW-Sw08_Az1AkC1FzPGf-2m1jWShCdvtNwEg" \
+  -e DIDIT_APP_ID="45be64d5-6267-4523-a12a-c4bd935088ae" \
+  -e DIDIT_SECRET="UF8SS37Yg6TnogRAQFiZTl6vMChFCwZd76ItXJRDAFk" \
+  -e DIDIT_WORKFLOW="da79daad-2156-4880-ad69-cc7014121d4b" \
   natnaelcrypto/job-market-place-backend:latest
+
+
+  https://jobtracker-lb-477288342.eu-north-1.elb.amazonaws.com/api/verification/webhook
