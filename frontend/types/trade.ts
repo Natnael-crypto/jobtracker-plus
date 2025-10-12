@@ -58,9 +58,8 @@ export interface UserAddress {
 }
 
 export interface Review {
-  id: string;
-  job_id: string;
-  reviewer_id: string;
+  reviewer: string;
+  reviewer_image: string;
   rate: number;
   comment?: string;
   created_at: string;

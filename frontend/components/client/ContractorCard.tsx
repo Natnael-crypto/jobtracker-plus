@@ -1,3 +1,5 @@
+"use client";
+
 import { useGetUserBid, useUpdateBidStatus } from "@/hooks/useBidStats";
 import {
   useGetInvitationsByJobUserID,
@@ -5,6 +7,8 @@ import {
 } from "@/hooks/useJobInvitations";
 import { useUserProfileDetail } from "@/hooks/usePortfolio";
 import { Star, UserPlus } from "lucide-react";
+import ReviewModal from "./ReviewModal";
+import { useState } from "react";
 
 const StarRating = ({
   rating,
@@ -33,6 +37,7 @@ export const ContractorCard: React.FC<{ id: string; jobId: string }> = ({
   );
 
   const { data: profile, isLoading: profileLoading } = useUserProfileDetail(id);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { mutate: updateBidStatus, isPending } = useUpdateBidStatus();
   const { mutate: updateInviteStatus, isPending: isPendingInvite } =
@@ -133,13 +138,21 @@ export const ContractorCard: React.FC<{ id: string; jobId: string }> = ({
                 Complete Job
               </button>
             ) : (
-              <button
-                onClick={() => handleStatusChange("completed")}
-                disabled={true}
-                className="px-3 py-1.5 text-red-700 hover:bg-red-100 transition whitespace-nowrap"
-              >
-                Completed
-              </button>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="text-gray-600 hover:text-gray-800 transition-colors duration-150"
+                >
+                  Leave a Review
+                </button>
+                <button
+                  onClick={() => handleStatusChange("completed")}
+                  disabled={true}
+                  className="px-3 py-1.5 text-red-700 hover:bg-red-100 transition whitespace-nowrap"
+                >
+                  Completed
+                </button>
+              </div>
             )}
           </div>
         ) : (
@@ -187,6 +200,13 @@ export const ContractorCard: React.FC<{ id: string; jobId: string }> = ({
           </div>
         )}
       </div>
+
+      <ReviewModal
+        jobId={jobId}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        user_id={profile.user_profile.user_id}
+      />
     </div>
   );
 };

@@ -23,13 +23,14 @@ func (h *ReviewHandler) CreateReview(c *gin.Context) {
 	var req struct {
 		Rate    int    `json:"rate" binding:"required"`
 		Comment string `json:"comment" binding:"required"`
+		UserID  string `json:"user_id" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	review, err := h.service.Create(jobID, reviewerID, req.Rate, req.Comment)
+	review, err := h.service.Create(jobID, reviewerID, req.Rate, req.Comment, req.UserID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

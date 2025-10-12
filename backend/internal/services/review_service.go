@@ -17,7 +17,7 @@ func NewReviewService(repo repositories.ReviewRepository) *ReviewService {
 	return &ReviewService{repo: repo}
 }
 
-func (s *ReviewService) Create(jobID, reviewerID string, rate int, comment string) (*models.Review, error) {
+func (s *ReviewService) Create(jobID, reviewerID string, rate int, comment, userID string) (*models.Review, error) {
 	if rate < 1 || rate > 5 {
 		return nil, errors.New("rate must be between 1 and 5")
 	}
@@ -40,6 +40,7 @@ func (s *ReviewService) Create(jobID, reviewerID string, rate int, comment strin
 		ID:         uuid.NewString(),
 		JobID:      jobID,
 		ReviewerID: reviewerID,
+		UserID:     userID,
 		Rate:       rate,
 		Comment:    comment,
 		CreatedAt:  time.Now(),
@@ -84,7 +85,7 @@ func (s *ReviewService) GetReviewsOfUser(userID string) ([]UserReview, error) {
 
 	var userReview []UserReview
 	for _, review := range reviews {
-		userProfile, err := s.repo.GetUserById(review.ReviewerID)
+		userProfile, err := s.repo.GetUserByClient(review.ReviewerID)
 		if err != nil {
 			return []UserReview{}, nil
 		}

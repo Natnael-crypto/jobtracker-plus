@@ -34,7 +34,7 @@ const TopNav = () => {
           {/* Logo */}
           <Link
             href="/"
-            className="text-xl font-bold tracking-widest text-gray-900"
+            className="text-lg font-medium tracking-widest text-gray-900"
           >
             JOBTRACKER <span className="text-green-500">+</span>
           </Link>

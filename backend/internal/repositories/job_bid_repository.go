@@ -210,7 +210,7 @@ func (r *jobBidRepository) GetAllBidsForJobByState(jobID string) (map[string][]m
 			COUNT(reviews.id) AS review_count
 		`).
 		Joins("JOIN job_bids ON job_bids.user_id = user_profiles.user_id").
-		Joins("LEFT JOIN reviews ON reviews.reviewer_id = user_profiles.user_id").
+		Joins("LEFT JOIN reviews ON reviews.user_id = user_profiles.user_id").
 		Where("job_bids.job_id = ? AND job_bids.status IN ?", jobID, []string{"pending", "shortlisted", "rejected", "hired", "completed"}).
 		Group(`
 			user_profiles.id,
@@ -254,7 +254,7 @@ func (r *jobBidRepository) GetAllBidsForJobByState(jobID string) (map[string][]m
 			COUNT(reviews.id) AS review_count
 		`).
 		Joins("JOIN job_invitations ON job_invitations.business_id = user_profiles.user_id").
-		Joins("LEFT JOIN reviews ON reviews.reviewer_id = user_profiles.user_id").
+		Joins("LEFT JOIN reviews ON reviews.user_id = user_profiles.user_id").
 		Where("job_invitations.job_id = ?", jobID).
 		Where("job_invitations.status In ('pending', 'accepted','completed')").
 		Group(`
@@ -291,7 +291,7 @@ func (r *jobBidRepository) GetAllBidsForJobByState(jobID string) (map[string][]m
 			COUNT(reviews.id) AS review_count
 		`).
 		Joins("JOIN job_invitations ON job_invitations.business_id = user_profiles.user_id").
-		Joins("LEFT JOIN reviews ON reviews.reviewer_id = user_profiles.user_id").
+		Joins("LEFT JOIN reviews ON reviews.user_id = user_profiles.user_id").
 		Where("job_invitations.job_id = ?", jobID).
 		Where("job_invitations.status = 'hired'").
 		Group(`

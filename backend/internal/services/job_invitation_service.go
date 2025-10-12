@@ -104,7 +104,7 @@ func (s *JobInvitationService) UpdateInvitationStatus(inviteID, status, role, us
 		if job.UserID != userID {
 			return errors.New("you can only update invitations for your own jobs")
 		}
-		if status != "hired" && status != "rejected" {
+		if status != "hired" && status != "rejected" && status != "completed" {
 			return errors.New("client can only hire or reject")
 		}
 	default:

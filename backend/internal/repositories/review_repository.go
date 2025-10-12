@@ -16,6 +16,7 @@ type ReviewRepository interface {
 	GetUserById(userId string) (*models.UserProfile, error)
 	GetAllReviewsUser(user_id string) ([]models.Review, error)
 	GetJobByID(jobID string) (models.Job, error)
+	GetUserByClient(userId string) (*models.UserProfile, error)
 }
 
 type reviewRepository struct {
@@ -79,7 +80,7 @@ func (r *reviewRepository) GetByUserJobs(userID string) ([]models.Review, error)
 
 func (r *reviewRepository) GetAllReviewsUser(user_id string) ([]models.Review, error) {
 	var reviews []models.Review
-	err := r.db.Where("reviewer_id = ?", user_id).Find(&reviews).Error
+	err := r.db.Where("user_id = ?", user_id).Find(&reviews).Error
 	if err != nil {
 		return nil, err
 	}
@@ -104,6 +105,15 @@ func (r *reviewRepository) GetAverageRating(userID string) (float64, error) {
 func (r *reviewRepository) GetUserById(userId string) (*models.UserProfile, error) {
 	var user models.UserProfile
 	err := r.db.First(&user, "id = ?", userId).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *reviewRepository) GetUserByClient(userId string) (*models.UserProfile, error) {
+	var user models.UserProfile
+	err := r.db.First(&user, "user_id = ?", userId).Error
 	if err != nil {
 		return nil, err
 	}

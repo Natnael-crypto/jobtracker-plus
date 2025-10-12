@@ -39,6 +39,14 @@ type ProviderFilter struct {
 	Offset    int
 }
 
+type UserReview struct {
+	Reviewer      string `json:"reviewer"`
+	ReviewerImage string `json:"reviewer_image"`
+	Rate          int    `json:"rate"`
+	Comment       string `json:"comment"`
+	CreateAt      string `json:"created_at"`
+}
+
 // Repository
 type ProviderRepository struct {
 	db *gorm.DB
@@ -100,38 +108,48 @@ func (r *ProviderRepository) GetProviders(ctx context.Context, f ProviderFilter)
 
 	// --- Base Query ---
 	query := fmt.Sprintf(`
+WITH review_stats AS (
+  SELECT
+    user_id,
+    COALESCE(ROUND(AVG(rate)::numeric, 2), 0) AS avg_rating,
+    COALESCE(COUNT(id), 0) AS review_count
+  FROM reviews
+  GROUP BY user_id
+),
+service_list AS (
+  SELECT
+    user_id,
+    COALESCE(json_agg(DISTINCT service_name) FILTER (WHERE service_name IS NOT NULL), '[]') AS services_json
+  FROM services
+  GROUP BY user_id
+)
 SELECT
   up.user_id,
   up.first_name,
   up.last_name,
   up.image_url,
-  COALESCE(ROUND(AVG(r.rate)::numeric, 2), 0) AS avg_rating,
-  COALESCE(COUNT(r.id), 0) AS review_count,
+  COALESCE(rs.avg_rating, 0) AS avg_rating,
+  COALESCE(rs.review_count, 0) AS review_count,
   bi.description AS about,
-  COALESCE(json_agg(DISTINCT s.service_name) FILTER (WHERE s.service_name IS NOT NULL), '[]') AS services_json,
+  COALESCE(sl.services_json, '[]') AS services_json,
   ua.city,
   ua.state,
   ua.country
 FROM user_profiles up
 INNER JOIN users u ON u.id = up.user_id
 LEFT JOIN business_introductions bi ON bi.user_id = up.user_id
-LEFT JOIN services s ON s.user_id = up.user_id
 LEFT JOIN user_addresses ua ON ua.user_id = up.user_id
-LEFT JOIN reviews r ON r.job_id IN (
-    SELECT j.id FROM jobs j WHERE j.user_id = up.user_id
-)
+LEFT JOIN review_stats rs ON rs.user_id = up.user_id
+LEFT JOIN service_list sl ON sl.user_id = up.user_id
 WHERE %s
-GROUP BY up.user_id, up.first_name, up.last_name, up.image_url, bi.description, ua.city, ua.state, ua.country
 `, joinClauses(whereClauses, " AND "))
 
-	// --- Minimum rating filter ---
 	if f.MinRating != nil {
 		args = append(args, *f.MinRating)
-		query += fmt.Sprintf(" HAVING COALESCE(ROUND(AVG(r.rate)::numeric, 2), 0) >= $%d", len(args))
+		query += fmt.Sprintf(" AND COALESCE(rs.avg_rating, 0) >= $%d", len(args))
 	}
 
-	// --- Ordering & Pagination ---
-	query += fmt.Sprintf(" ORDER BY avg_rating DESC NULLS LAST, review_count DESC LIMIT %d OFFSET %d", f.Limit, f.Offset)
+	query += fmt.Sprintf(" ORDER BY rs.avg_rating DESC NULLS LAST, rs.review_count DESC LIMIT %d OFFSET %d", f.Limit, f.Offset)
 
 	// --- Execute Query ---
 	rows, err := r.db.WithContext(ctx).Raw(query, args...).Rows()
@@ -221,7 +239,7 @@ func nilIfEmpty(ns sql.NullString) *string {
 type ProviderDetail struct {
 	Profile              models.UserProfile
 	Address              models.UserAddress
-	Review               []models.Review
+	Review               []UserReview
 	Rate                 int64
 	ReviewCount          int64
 	Portfolio            []models.Portfolio
@@ -270,7 +288,23 @@ func (r *ProviderRepository) GetByUserID(ctx context.Context, userID string) (Pr
 		return detail, err
 	}
 
-	detail.Review = reviews
+	reviewWithUser := make([]UserReview, 0, len(reviews))
+	for _, rew := range reviews {
+		userProfile, err := r.GetUserByIdClient(rew.ReviewerID)
+		if err != nil {
+			return detail, nil
+		}
+		ur := UserReview{
+			Reviewer:      userProfile.FirstName + " " + userProfile.LastName,
+			ReviewerImage: userProfile.ImageURL,
+			Rate:          rew.Rate,
+			Comment:       rew.Comment,
+			CreateAt:      rew.CreatedAt.Format("02-01-2006"),
+		}
+		reviewWithUser = append(reviewWithUser, ur)
+	}
+
+	detail.Review = reviewWithUser
 	detail.ReviewCount = int64(len(reviews))
 
 	if len(reviews) > 0 {
@@ -306,4 +340,14 @@ func (r *ProviderRepository) GetByUserID(ctx context.Context, userID string) (Pr
 	}
 
 	return detail, nil
+}
+
+func (r *ProviderRepository) GetUserByIdClient(userId string) (*models.UserProfile, error) {
+	var user models.UserProfile
+	err := r.db.First(&user, "user_id = ?", userId).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+
 }

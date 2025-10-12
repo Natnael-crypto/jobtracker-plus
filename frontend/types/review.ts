@@ -22,6 +22,7 @@ export interface Review {
 export interface CreateReviewRequest {
   rate: number;
   comment: string;
+  user_id: string;
 }
 
 export interface CreateReviewResponse extends Review {}
