@@ -30,7 +30,7 @@ func (h *VerificationHandler) CreateSession(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(http.StatusTemporaryRedirect, session.URL)
+	c.Redirect(http.StatusPermanentRedirect, session.URL)
 }
 
 func (h *VerificationHandler) Webhook(c *gin.Context) {
