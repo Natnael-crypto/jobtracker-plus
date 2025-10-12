@@ -27,6 +27,15 @@ func (s *ReviewService) Create(jobID, reviewerID string, rate int, comment strin
 		return nil, errors.New("review already exists for this job")
 	}
 
+	job, err := s.repo.GetJobByID(jobID)
+	if err != nil {
+		return nil, errors.New("job not found")
+	}
+
+	if job.UserID != reviewerID {
+		return nil, errors.New("cannot review Others job")
+	}
+
 	review := &models.Review{
 		ID:         uuid.NewString(),
 		JobID:      jobID,

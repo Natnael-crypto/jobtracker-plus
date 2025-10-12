@@ -54,11 +54,12 @@ const TimelineStep: React.FC<{ step: Step; align: Position }> = ({
   return (
     <article
       aria-labelledby={`step-title-${step.id}`}
-      className={`relative py-8 md:py-6 ${
+      className={`relative py-6 md:py-6 ${
         isLeft ? "md:text-left md:pr-8" : "md:text-left md:pl-8"
       }`}
     >
-      <div className="flex items-center space-x-4 md:hidden mb-4">
+      {/* Mobile */}
+      <div className="flex items-start space-x-4 md:hidden mb-4">
         <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white border-2 border-black text-xs font-semibold">
           {step.id}
         </span>
@@ -67,33 +68,31 @@ const TimelineStep: React.FC<{ step: Step; align: Position }> = ({
             <Image src={step.icon} alt={step.title} width={40} height={40} />
           )}
         </div>
+        <div className="flex-1">
+          <h3 className="text-base font-semibold mb-1">{step.title}</h3>
+          <p className="text-gray-600 text-sm leading-relaxed">{step.text}</p>
+        </div>
       </div>
 
-      <div className={`flex flex-col space-y-2`}>
-        <div
-          className={`hidden md:flex flex-col space-y-4 ${
-            isLeft ? "md:items-end" : "md:items-start"
-          }`}
-        >
-          <div>
-            {step.icon && (
-              <Image
-                src={step.icon}
-                alt={step.title}
-                width={80}
-                height={80}
-                className="mx-auto"
-              />
-            )}
-          </div>
-          <h3 id={`step-title-${step.id}`} className="text-xl font-semibold">
-            {step.title}
-          </h3>
-        </div>
-
+      {/* Desktop */}
+      <div
+        className={`hidden md:flex flex-col space-y-4 ${
+          isLeft ? "md:items-end" : "md:items-start"
+        }`}
+      >
+        {step.icon && (
+          <Image
+            src={step.icon}
+            alt={step.title}
+            width={80}
+            height={80}
+            className="mx-auto"
+          />
+        )}
+        <h3 id={`step-title-${step.id}`} className="text-xl font-semibold">
+          {step.title}
+        </h3>
         <p className="text-gray-600 text-sm leading-relaxed">{step.text}</p>
-
-        <h3 className="text-xl font-semibold md:hidden">{step.title}</h3>
       </div>
     </article>
   );
@@ -105,39 +104,35 @@ const TimelineSection: React.FC = () => {
       className="container mx-auto max-w-4xl px-4 py-16 md:py-24"
       aria-label="How it works timeline"
     >
+      {/* Mobile Timeline */}
       <div className="relative md:hidden">
         <div className="absolute top-0 left-6 w-[2px] h-full bg-gray-200" />
         {timelineSteps.map((step) => (
-          <div key={step.id} className="ml-12 relative">
-            <div className="absolute -left-6 top-4 w-8 h-8 rounded-full bg-white border-2 border-black flex items-center justify-center text-xs font-semibold">
-              {step.id}
-            </div>
+          <div key={step.id} className="ml-12 relative mb-8 last:mb-0">
             <TimelineStep step={step} align="left" />
           </div>
         ))}
       </div>
 
+      {/* Desktop Timeline */}
       <div className="hidden md:grid grid-cols-[1fr_72px_1fr] gap-x-8 relative">
         <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2px] bg-gray-200" />
-
         {timelineSteps.map((step) => (
           <React.Fragment key={step.id}>
             <div className="col-span-1 flex items-start">
-              {step.position === "left" ? (
+              {step.position === "left" && (
                 <TimelineStep step={step} align="left" />
-              ) : null}
+              )}
             </div>
-
             <div className="col-span-1 flex justify-center items-start relative z-10">
               <div className="w-12 h-12 rounded-full bg-white border-2 border-black flex items-center justify-center text-sm font-semibold -mt-2">
                 {step.id}
               </div>
             </div>
-
             <div className="col-span-1 flex items-start">
-              {step.position === "right" ? (
+              {step.position === "right" && (
                 <TimelineStep step={step} align="right" />
-              ) : null}
+              )}
             </div>
           </React.Fragment>
         ))}
@@ -165,9 +160,10 @@ const HeaderSection: React.FC = () => {
           height={550}
           className="w-full h-auto object-cover object-center"
         />
-
-        <div className="absolute top-1/2 left-4 md:left-10 lg:left-20 -translate-y-1/2 w-11/12 max-w-xs bg-white p-6 md:p-8 rounded-lg shadow-2xl space-y-6">
-          <h2 className="text-xl font-bold">How it works</h2>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-xs bg-white p-4 md:p-8 rounded-lg shadow-2xl space-y-6">
+          <h2 className="text-xl font-bold text-center md:text-left">
+            How it works
+          </h2>
           <div className="space-y-4">
             {[
               "Post your job for free",
@@ -190,13 +186,15 @@ const HeaderSection: React.FC = () => {
 
 const CTASection: React.FC = () => (
   <section className="container mx-auto px-4 max-w-4xl py-20 md:py-28">
-    <div className="border border-gray-300 rounded-lg p-10 md:p-12 flex flex-col items-center space-y-8">
+    <div className="border border-gray-300 rounded-lg p-8 md:p-12 flex flex-col items-center space-y-6 md:space-y-8">
       <h2 className="text-2xl md:text-3xl font-semibold text-center text-gray-800">
         Ready to find a tradesperson near you?
       </h2>
       <button
-        type="button"
-        className="px-8 py-4 bg-black text-white font-semibold text-lg rounded-lg shadow-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition duration-200"
+        onClick={() => {
+          window.location.href = "/post-job";
+        }}
+        className="w-full md:w-auto px-6 md:px-8 py-3 md:py-4 bg-black text-white font-semibold text-lg rounded-lg shadow-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition duration-200"
       >
         Get started
       </button>

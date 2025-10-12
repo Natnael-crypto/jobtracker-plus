@@ -1,5 +1,9 @@
 import api from "@/lib/axios";
-import type { ReviewResponse } from "@/types/review";
+import type {
+  CreateReviewRequest,
+  CreateReviewResponse,
+  ReviewResponse,
+} from "@/types/review";
 
 export const getUserReviews = async (
   userId: string
@@ -15,4 +19,16 @@ export const getUserReviews = async (
       error.response?.data?.error || "Failed to fetch user reviews"
     );
   }
+};
+
+export const createReview = async (
+  jobID: string,
+  data: CreateReviewRequest
+): Promise<CreateReviewResponse> => {
+  const response = await api.post(`/reviews/job/${jobID}`, data, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return response.data;
 };

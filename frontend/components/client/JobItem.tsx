@@ -2,6 +2,7 @@
 
 import { useJobBidStats } from "@/hooks/useBidStats";
 import { useEffect, useState } from "react";
+import ReviewModal from "./ReviewModal";
 
 interface JobItemProps {
   id: string;
@@ -58,6 +59,7 @@ export const JobItem: React.FC<JobItemProps> = ({
   category,
 }) => {
   const { data, isLoading, isError } = useJobBidStats(id);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Handle loading/error states for resilience
   if (isLoading) {
@@ -138,12 +140,12 @@ export const JobItem: React.FC<JobItemProps> = ({
             >
               Hired
             </a>
-            <a
-              href={`/client/my-jobs/${id}`}
+            <button
+              onClick={() => setIsModalOpen(true)}
               className="text-gray-600 hover:text-gray-800 transition-colors duration-150"
             >
               Leave a Review
-            </a>
+            </button>
             <a
               href={`/client/my-jobs/${id}`}
               className="text-blue-600 hover:text-blue-800 transition-colors duration-150"
@@ -153,6 +155,11 @@ export const JobItem: React.FC<JobItemProps> = ({
           </>
         )}
       </div>
+      <ReviewModal
+        jobId={id}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 };

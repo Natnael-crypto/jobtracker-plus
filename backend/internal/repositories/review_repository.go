@@ -15,6 +15,7 @@ type ReviewRepository interface {
 	GetAverageRating(userID string) (float64, error)
 	GetUserById(userId string) (*models.UserProfile, error)
 	GetAllReviewsUser(user_id string) ([]models.Review, error)
+	GetJobByID(jobID string) (models.Job, error)
 }
 
 type reviewRepository struct {
@@ -39,6 +40,15 @@ func (r *reviewRepository) GetByID(id string) (*models.Review, error) {
 		return nil, err
 	}
 	return &review, nil
+}
+
+func (r *reviewRepository) GetJobByID(jobID string) (models.Job, error) {
+	var reviews models.Job
+	err := r.db.Where("id = ?", jobID).First(&reviews).Error
+	if err != nil {
+		return reviews, err
+	}
+	return reviews, nil
 }
 
 func (r *reviewRepository) GetByJobAndReviewer(jobID, reviewerID string) (*models.Review, error) {
