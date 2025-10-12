@@ -54,7 +54,17 @@ export const useUploadProfileImage = () => {
 
 export const useCreateVerificationSession = () => {
   return useMutation({
-    mutationFn: () => createsVerificationSession(),
+    mutationFn: createsVerificationSession,
+    onSuccess: (data) => {
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        console.error("Verification session URL missing from response:", data);
+      }
+    },
+    onError: (error) => {
+      console.error("Failed to create verification session:", error);
+    },
   });
 };
 

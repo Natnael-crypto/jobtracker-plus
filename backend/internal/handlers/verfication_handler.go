@@ -30,7 +30,9 @@ func (h *VerificationHandler) CreateSession(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(http.StatusPermanentRedirect, session.URL)
+	c.JSON(http.StatusOK, gin.H{
+		"url": session.URL,
+	})
 }
 
 func (h *VerificationHandler) Webhook(c *gin.Context) {
@@ -44,7 +46,7 @@ func (h *VerificationHandler) Webhook(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
-	c.Redirect(http.StatusPermanentRedirect, h.Frontend+"/business/profile")
+	c.JSON(http.StatusOK, gin.H{"message": "webhook verified"})
 }
 
 func (h *VerificationHandler) Verify(c *gin.Context) {
