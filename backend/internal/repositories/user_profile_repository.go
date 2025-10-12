@@ -131,8 +131,10 @@ func (r *UserProfileRepository) ProfileStatus(userID string) (*ProfileStatsRespo
 	} else {
 		if !Identity.Verified {
 			profileStat.Identity = false
+		} else {
+			profileStat.Identity = true
+
 		}
-		profileStat.Identity = true
 	}
 
 	if err := r.DB.Where("user_id = ? AND type = 'email'", userID).First(&Email).Error; err != nil {
@@ -140,8 +142,10 @@ func (r *UserProfileRepository) ProfileStatus(userID string) (*ProfileStatsRespo
 	} else {
 		if !Email.Verified {
 			profileStat.Email = false
+		} else {
+			profileStat.Email = true
+
 		}
-		profileStat.Email = true
 	}
 
 	if err := r.DB.Where("user_id = ?", userID).First(&address).Error; err != nil {
