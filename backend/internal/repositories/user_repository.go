@@ -56,5 +56,6 @@ func (r *UserRepository) UpdateVerify(user *models.UserVerification) error {
 func (r *UserRepository) Verified(userID, types string) (models.UserVerification, error) {
 	var user models.UserVerification
 	err := r.DB.Where("user_id = ? AND type = ?", userID, types).First(&user).Error
+
 	return user, err
 }

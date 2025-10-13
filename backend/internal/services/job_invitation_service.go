@@ -3,6 +3,7 @@ package services
 import (
 	"backend/internal/models"
 	"backend/internal/repositories"
+	"context"
 	"errors"
 	"time"
 
@@ -10,13 +11,14 @@ import (
 )
 
 type JobInvitationService struct {
-	repo       repositories.JobInvitationRepository
-	creditRepo repositories.CreditRepository
-	jobRepo    repositories.JobBidRepository
+	repo         repositories.JobInvitationRepository
+	creditRepo   repositories.CreditRepository
+	jobRepo      repositories.JobBidRepository
+	notification *NotificationService
 }
 
-func NewJobInvitationService(repo repositories.JobInvitationRepository, creditRepo repositories.CreditRepository, jobRepo repositories.JobBidRepository) *JobInvitationService {
-	return &JobInvitationService{repo: repo, creditRepo: creditRepo, jobRepo: jobRepo}
+func NewJobInvitationService(repo repositories.JobInvitationRepository, creditRepo repositories.CreditRepository, jobRepo repositories.JobBidRepository, notification *NotificationService) *JobInvitationService {
+	return &JobInvitationService{repo: repo, creditRepo: creditRepo, jobRepo: jobRepo, notification: notification}
 }
 
 // CreateInvitation - only clients can create invitations
@@ -51,6 +53,9 @@ func (s *JobInvitationService) CreateInvitation(jobID, businessID, role, userID 
 	if err := s.repo.Create(invite); err != nil {
 		return nil, err
 	}
+
+	s.notification.Create(context.Background(), businessID, "Job Invitation", "You have been invited to join the job"+job.Headline)
+
 	return invite, nil
 }
 
@@ -116,6 +121,7 @@ func (s *JobInvitationService) UpdateInvitationStatus(inviteID, status, role, us
 		if err != nil {
 			return err
 		}
+		s.notification.Create(context.Background(), invite.BusinessID, "Job Hired", "You have been hired for the job "+invite.JobID)
 	}
 
 	if status == "completed" {
@@ -123,6 +129,8 @@ func (s *JobInvitationService) UpdateInvitationStatus(inviteID, status, role, us
 		if err != nil {
 			return err
 		}
+		s.notification.Create(context.Background(), invite.BusinessID, "Job Completed", invite.JobID+" has been completed")
+
 	}
 
 	return s.repo.UpdateStatus(inviteID, status)

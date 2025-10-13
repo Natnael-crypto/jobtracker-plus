@@ -4,6 +4,7 @@ import (
 	"backend/internal/models"
 	"backend/internal/repositories"
 	"backend/internal/utils"
+	"context"
 	"errors"
 
 	"github.com/google/uuid"
@@ -14,10 +15,11 @@ type UserService struct {
 	JwtSecrete         string
 	UserProfileService *UserProfileService
 	CreditService      *CreditService
+	Notification       *NotificationService
 }
 
-func NewUserService(repo *repositories.UserRepository, JwtSecrete string, UserProfileService *UserProfileService, CreditService *CreditService) *UserService {
-	return &UserService{Repo: repo, JwtSecrete: JwtSecrete, UserProfileService: UserProfileService, CreditService: CreditService}
+func NewUserService(repo *repositories.UserRepository, JwtSecrete string, UserProfileService *UserProfileService, CreditService *CreditService, Notification *NotificationService) *UserService {
+	return &UserService{Repo: repo, JwtSecrete: JwtSecrete, UserProfileService: UserProfileService, CreditService: CreditService, Notification: Notification}
 }
 
 type UserVerificationStatus struct {
@@ -72,6 +74,13 @@ func (s *UserService) Register(email, password, role, first_name, last_name, pho
 
 	_, _ = s.UserProfileService.CreateProfile(user.ID, first_name, last_name, phone_number)
 
+	message := "Welcome to JobTracker Please Fill Out Your Profile"
+
+	if user.Role == "business" {
+		message = "Welcome to JobTracker Please Fill Out Your Business Profile"
+	}
+
+	s.Notification.Create(context.Background(), user.ID, "Welcome to JobTracker", message)
 	return user, nil
 }
 

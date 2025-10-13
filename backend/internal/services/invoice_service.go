@@ -12,11 +12,12 @@ import (
 )
 
 type InvoiceService struct {
-	repo repositories.InvoiceRepository
+	repo         repositories.InvoiceRepository
+	notification *NotificationService
 }
 
-func NewInvoiceService(repo repositories.InvoiceRepository) *InvoiceService {
-	return &InvoiceService{repo: repo}
+func NewInvoiceService(repo repositories.InvoiceRepository, notification *NotificationService) *InvoiceService {
+	return &InvoiceService{repo: repo, notification: notification}
 }
 
 func (s *InvoiceService) Create(ctx context.Context,
@@ -96,6 +97,8 @@ func (s *InvoiceService) Create(ctx context.Context,
 	if err != nil {
 		return nil, nil, err
 	}
+
+	s.notification.Create(context.Background(), userID, "Invoice Created", "Invoice created for job")
 
 	return invoices, lineItemsList, nil
 }

@@ -3,6 +3,7 @@ package services
 import (
 	"backend/internal/models"
 	"backend/internal/repositories"
+	"context"
 	"errors"
 	"time"
 
@@ -10,12 +11,13 @@ import (
 )
 
 type JobBidService struct {
-	repo       repositories.JobBidRepository
-	creditRepo repositories.CreditRepository
+	repo         repositories.JobBidRepository
+	creditRepo   repositories.CreditRepository
+	notification *NotificationService
 }
 
-func NewJobBidService(repo repositories.JobBidRepository, creditRepo repositories.CreditRepository) *JobBidService {
-	return &JobBidService{repo: repo, creditRepo: creditRepo}
+func NewJobBidService(repo repositories.JobBidRepository, creditRepo repositories.CreditRepository, notification *NotificationService) *JobBidService {
+	return &JobBidService{repo: repo, creditRepo: creditRepo, notification: notification}
 }
 
 // CreateBid - only business users can bid
@@ -63,6 +65,7 @@ func (s *JobBidService) CreateBid(jobID, userID, role string) (*models.JobBid, e
 	if err := s.repo.Create(bid); err != nil {
 		return nil, err
 	}
+	s.notification.Create(context.Background(), userID, "Job Bid", "You have created a bid for the job "+jobID)
 	return bid, nil
 }
 
@@ -128,6 +131,18 @@ func (s *JobBidService) UpdateBidStatus(bidID, status, role, userID string) erro
 		if err != nil {
 			return err
 		}
+	}
+
+	if status == "shortlisted" {
+		s.notification.Create(context.Background(), bid.UserID, "Job Shortlisted", "You have been shortlisted for the job "+job.Headline)
+	}
+
+	if status == "hired" {
+		s.notification.Create(context.Background(), bid.UserID, "Job Hired", "You have been hired for the job "+job.Headline)
+	}
+
+	if status == "completed" {
+		s.notification.Create(context.Background(), bid.UserID, "Job Completed", job.Headline+" has been completed")
 	}
 
 	return nil

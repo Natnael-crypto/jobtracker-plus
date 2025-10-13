@@ -25,6 +25,10 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 
 	s3Service := utils.NewS3Service(utils.AWSConfig(cfg.AWS))
 
+	notification_repo := repositories.NewNotificationRepository(db)
+	notification_service := services.NewNotificationService(notification_repo)
+	notification_handler := handlers.NewNotificationHandler(*notification_service)
+
 	user_profile_repo := repositories.NewUserProfileRepository(db)
 	user_profile_service := services.NewUserProfileService(user_profile_repo, s3Service)
 	user_profile_handler := handlers.NewUserProfileHandler(user_profile_service)
@@ -36,7 +40,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	credit_service := services.NewCreditService(credit_repo, *userRepo)
 	credit_handler := handlers.NewCreditHandler(*credit_service, cfg)
 
-	userService := services.NewUserService(userRepo, cfg.JWT.SecretKey, user_profile_service, credit_service)
+	userService := services.NewUserService(userRepo, cfg.JWT.SecretKey, user_profile_service, credit_service, notification_service)
 	userHandler := handlers.NewUserHandler(userService, frontendURL)
 
 	user_address_repo := repositories.NewUserAddressRepository(db)
@@ -90,16 +94,12 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	review_service := services.NewReviewService(review_repo)
 	review_handler := handlers.NewReviewHandler(*review_service)
 
-	notification_repo := repositories.NewNotificationRepository(db)
-	notification_service := services.NewNotificationService(notification_repo)
-	notification_handler := handlers.NewNotificationHandler(*notification_service)
-
 	job_bid_repo := repositories.NewJobBidRepository(db)
-	job_bid_service := services.NewJobBidService(job_bid_repo, credit_repo)
+	job_bid_service := services.NewJobBidService(job_bid_repo, credit_repo, notification_service)
 	job_bid_handler := handlers.NewJobBidHandler(*job_bid_service)
 
 	job_invitation_repo := repositories.NewJobInvitationRepository(db)
-	job_invitation_service := services.NewJobInvitationService(job_invitation_repo, credit_repo, job_bid_repo)
+	job_invitation_service := services.NewJobInvitationService(job_invitation_repo, credit_repo, job_bid_repo, notification_service)
 	job_invitation_handler := handlers.NewJobInvitationHandler(*job_invitation_service)
 
 	job_handler := handlers.NewJobHandler(job_service, *job_address_service, *job_image_service, *job_bid_service, *job_invitation_service)
@@ -109,7 +109,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	quotation_handler := handlers.NewQuotationHandler(*quotation_service)
 
 	invoice_repo := repositories.NewInvoiceRepository(db)
-	invoice_service := services.NewInvoiceService(*invoice_repo)
+	invoice_service := services.NewInvoiceService(*invoice_repo, notification_service)
 	invoice_handler := handlers.NewInvoiceHandler(*invoice_service)
 
 	business_users_repo := repositories.NewProviderRepository(db)
