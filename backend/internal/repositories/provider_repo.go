@@ -72,6 +72,7 @@ func (r *ProviderRepository) GetProviders(ctx context.Context, f ProviderFilter)
 	whereClauses = append(whereClauses, "u.role = 'business'")
 
 	// --- Filter by Services ---
+	serviceFilterEnabled := false
 	if len(f.Services) > 0 {
 		placeholders := ""
 		for _, s := range f.Services {
@@ -80,6 +81,7 @@ func (r *ProviderRepository) GetProviders(ctx context.Context, f ProviderFilter)
 		}
 		placeholders = placeholders[:len(placeholders)-1]
 		whereClauses = append(whereClauses, fmt.Sprintf("s.service_name IN (%s)", placeholders))
+		serviceFilterEnabled = true
 	}
 
 	// --- Location filters ---
@@ -96,7 +98,7 @@ func (r *ProviderRepository) GetProviders(ctx context.Context, f ProviderFilter)
 		whereClauses = append(whereClauses, fmt.Sprintf("ua.country = $%d", len(args)))
 	}
 
-	// --- Search by name (case-insensitive partial match) ---
+	// --- Search by name ---
 	if f.Search != nil && *f.Search != "" {
 		searchTerm := "%" + strings.ToLower(*f.Search) + "%"
 		args = append(args, searchTerm, searchTerm)
@@ -123,7 +125,7 @@ service_list AS (
   FROM services
   GROUP BY user_id
 )
-SELECT
+SELECT DISTINCT ON (up.user_id)  -- ✅ ensures unique users
   up.user_id,
   up.first_name,
   up.last_name,
@@ -141,15 +143,30 @@ LEFT JOIN business_introductions bi ON bi.user_id = up.user_id
 LEFT JOIN user_addresses ua ON ua.user_id = up.user_id
 LEFT JOIN review_stats rs ON rs.user_id = up.user_id
 LEFT JOIN service_list sl ON sl.user_id = up.user_id
+%s
 WHERE %s
-`, joinClauses(whereClauses, " AND "))
+`,
+		// only join `services s` when filtering by service name
+		func() string {
+			if serviceFilterEnabled {
+				return "LEFT JOIN services s ON s.user_id = up.user_id"
+			}
+			return ""
+		}(),
+		joinClauses(whereClauses, " AND "),
+	)
 
+	// --- Min Rating Filter ---
 	if f.MinRating != nil {
 		args = append(args, *f.MinRating)
 		query += fmt.Sprintf(" AND COALESCE(rs.avg_rating, 0) >= $%d", len(args))
 	}
 
-	query += fmt.Sprintf(" ORDER BY rs.avg_rating DESC NULLS LAST, rs.review_count DESC LIMIT %d OFFSET %d", f.Limit, f.Offset)
+	// --- Sorting & Pagination ---
+	query += fmt.Sprintf(`
+ORDER BY up.user_id, rs.avg_rating DESC NULLS LAST, rs.review_count DESC
+LIMIT %d OFFSET %d
+`, f.Limit, f.Offset)
 
 	// --- Execute Query ---
 	rows, err := r.db.WithContext(ctx).Raw(query, args...).Rows()
@@ -185,7 +202,6 @@ WHERE %s
 			}
 		}
 
-		// fallback: load services if empty (for backward compatibility)
 		if len(services) == 0 {
 			var getServices []models.Service
 			if err := r.db.Where("user_id = ?", userID).Find(&getServices).Error; err == nil {

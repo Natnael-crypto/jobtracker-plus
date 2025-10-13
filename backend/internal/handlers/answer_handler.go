@@ -153,7 +153,7 @@ func (h *AnswerHandler) Like(c *gin.Context) {
 		return
 	}
 
-	if err := h.svc.LikeAnswer(c, userID, answerID); err != nil {
+	if err := h.svc.LikeAnswer(c, answerID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

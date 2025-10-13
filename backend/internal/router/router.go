@@ -172,87 +172,85 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	}
 
 	business := api.Group("/business")
-	business.Use(middleware.AuthMiddleware(cfg.JWT.SecretKey))
+	business.Use(middleware.AuthMiddleware(cfg.JWT.SecretKey), middleware.RoleMiddleware("business"))
 	{
 
-		business.GET("/jobs", job_handler.GetJobsForBusiness)
-		business.GET("/jobs/shortlisted", job_handler.GetShortlistedJobs)
-		business.GET("/jobs/awarded", job_handler.GetAwardedJobs)
-		business.GET("/jobs/:job_id/client", job_handler.GetClientDetailJob)
-		business.GET("/jobs/invites", job_handler.GetInvitedJobs)
-		business.GET("/jobs/stat", job_invitation_handler.GetInvitationStats)
-		business.GET("/jobs/invite/:job_id", job_invitation_handler.GetJobInvitationForUser)
+		business.GET("/jobs", job_handler.GetJobsForBusiness)                                // Good
+		business.GET("/jobs/shortlisted", job_handler.GetShortlistedJobs)                    // Good
+		business.GET("/jobs/awarded", job_handler.GetAwardedJobs)                            // Good
+		business.GET("/jobs/:job_id/client", job_handler.GetClientDetailJob)                 // Good
+		business.GET("/jobs/invites", job_handler.GetInvitedJobs)                            // Good
+		business.GET("/jobs/stat", job_invitation_handler.GetInvitationStats)                // Good
+		business.GET("/jobs/invite/:job_id", job_invitation_handler.GetJobInvitationForUser) // Good
 
-		// business.PUT("/invitations/:id/status", job_invitation_handler.UpdateInvitationStatus)
+		business.PUT("/range", business_range_handler.UpdateBusinessRange) // Good
+		business.GET("/range", business_range_handler.GetBusinessRange)    // Good
 
-		business.PUT("/range", business_range_handler.UpdateBusinessRange)
-		business.GET("/range", business_range_handler.GetBusinessRange)
+		business.POST("/services", service_handler.CreateService)               // Good
+		business.DELETE("/services/:service_id", service_handler.DeleteService) // Good
+		business.GET("/my-services", service_handler.GetMyServices)             // Good
 
-		business.POST("/services", service_handler.CreateService)
-		business.DELETE("/services/:service_id", service_handler.DeleteService)
-		business.GET("/my-services", service_handler.GetMyServices)
+		business.POST("/qualifications", qualification_handler.CreateQualification)                     // Good
+		business.PUT("/qualifications/:qualification_id", qualification_handler.UpdateQualification)    // Good
+		business.DELETE("/qualifications/:qualification_id", qualification_handler.DeleteQualification) // Good
+		business.GET("/my-qualifications", qualification_handler.GetMyQualifications)                   // Good
 
-		business.POST("/qualifications", qualification_handler.CreateQualification)
-		business.PUT("/qualifications/:qualification_id", qualification_handler.UpdateQualification)
-		business.DELETE("/qualifications/:qualification_id", qualification_handler.DeleteQualification)
-		business.GET("/my-qualifications", qualification_handler.GetMyQualifications)
+		business.PUT("/introduction", business_introduction_handler.UpdateIntroduction)   // Good
+		business.GET("/my-introduction", business_introduction_handler.GetIntroductionMe) // Good
 
-		business.PUT("/introduction", business_introduction_handler.UpdateIntroduction)
-		business.GET("/my-introduction", business_introduction_handler.GetIntroductionMe)
+		business.POST("/portfolio", portfolio_handler.UploadPortfolioImage)                 // Good
+		business.DELETE("/portfolio/:portfolio_id", portfolio_handler.DeletePortfolioImage) // Good
+		business.GET("/portfolio", portfolio_handler.GetMyUserPortfolio)                    // Good
 
-		business.POST("/portfolio", portfolio_handler.UploadPortfolioImage)
-		business.DELETE("/portfolio/:portfolio_id", portfolio_handler.DeletePortfolioImage)
-		business.GET("/portfolio", portfolio_handler.GetMyUserPortfolio)
+		business.GET("/credit", credit_handler.GetCredit)       // Good
+		business.POST("/credit/buy", credit_handler.BuyCredits) // Good
 
-		business.GET("/credit", credit_handler.GetCredit)
-		business.POST("/credit/buy", credit_handler.BuyCredits)
+		business.GET("/bids/:job_id", job_bid_handler.GetBid)           // Good
+		business.POST("/bids/:job_id", job_bid_handler.CreateBid)       // Good
+		business.PUT("/bids/:id/withdraw", job_bid_handler.WithdrawBid) // Good
+		business.GET("/bids/stat", job_bid_handler.GetMyBidStat)        // Good
 
-		business.GET("/bids/:job_id", job_bid_handler.GetBid)
-		business.POST("/bids/:job_id", job_bid_handler.CreateBid)
-		business.PUT("/bids/:id/withdraw", job_bid_handler.WithdrawBid)
-		business.GET("/bids/stat", job_bid_handler.GetMyBidStat)
+		// business.GET("/invitations/:user_id", job_invitation_handler.GetInvitationsByUser)
+		business.PUT("/invitations/:id/status", job_invitation_handler.UpdateInvitationStatus) // Good
 
-		business.GET("/invitations/:user_id", job_invitation_handler.GetInvitationsByUser)
-		business.PUT("/invitations/:id/status", job_invitation_handler.UpdateInvitationStatus)
-
-		business.POST("/verification/session", verification_handler.CreateSession)
-		business.GET("/verification/verify", verification_handler.Verify)
+		business.POST("/verification/session", verification_handler.CreateSession) // Good
+		business.GET("/verification/verify", verification_handler.Verify)          // Good
 	}
 
-	api.POST("/verification/webhook", verification_handler.Webhook)
-	api.GET("/business/services/:user_id", service_handler.GetServices)
-	api.GET("/business/qualifications/:user_id", qualification_handler.GetUserQualifications)
-	api.GET("/business/introduction/:user_id", business_introduction_handler.GetIntroduction)
-	api.GET("/business/portfolio/:user_id", portfolio_handler.GetUserPortfolio)
+	api.POST("/verification/webhook", verification_handler.Webhook)                           // Good
+	api.GET("/business/services/:user_id", service_handler.GetServices)                       // Good
+	api.GET("/business/qualifications/:user_id", qualification_handler.GetUserQualifications) // Good
+	api.GET("/business/introduction/:user_id", business_introduction_handler.GetIntroduction) // Good
+	api.GET("/business/portfolio/:user_id", portfolio_handler.GetUserPortfolio)               // Good
 
 	client := api.Group("/client")
-	client.Use(middleware.AuthMiddleware(cfg.JWT.SecretKey))
+	client.Use(middleware.AuthMiddleware(cfg.JWT.SecretKey), middleware.RoleMiddleware("client"))
 	{
-		client.POST("/jobs", job_handler.CreateJob)
-		client.PUT("/jobs/:id", job_handler.UpdateJob)
-		client.PATCH("/jobs/:id/status", job_handler.UpdateJobStatus)
-		client.DELETE("/jobs/:id", job_handler.DeleteJob)
-		client.GET("/my-jobs", job_handler.GetMyJobs)
-		client.GET("/my-jobs/stat", job_handler.GetMyJobStat)
+		client.POST("/jobs", job_handler.CreateJob)                   // Good
+		client.PUT("/jobs/:id", job_handler.UpdateJob)                // Good
+		client.PATCH("/jobs/:id/status", job_handler.UpdateJobStatus) // Good
+		client.DELETE("/jobs/:id", job_handler.DeleteJob)             // Good
+		client.GET("/my-jobs", job_handler.GetMyJobs)                 // Good
+		client.GET("/my-jobs/stat", job_handler.GetMyJobStat)         // Good
 
-		client.GET("/jobs/:job_id/bid-invite", job_bid_handler.GetAllBidsForJobByState)
-		client.GET("/jobs/:job_id/:user_id/bid", job_bid_handler.GetBidOfUserByJobID)
-		client.GET("/jobs/:job_id/bid/stats", job_bid_handler.GetBidStats)
+		client.GET("/jobs/:job_id/bid-invite", job_bid_handler.GetAllBidsForJobByState) // Good
+		client.GET("/jobs/:job_id/:user_id/bid", job_bid_handler.GetBidOfUserByJobID)   // Good
+		client.GET("/jobs/:job_id/bid/stats", job_bid_handler.GetBidStats)              // Good
 
-		client.POST("/jobs/:job_id/address", job_address_handler.CreateJobAddress)
+		client.POST("/jobs/:job_id/address", job_address_handler.CreateJobAddress) // Good
 
-		client.POST("/jobs/:job_id/images", job_image_handler.CreateJobImage)
-		client.DELETE("/jobs/images/:id", job_image_handler.DeleteJobImage)
+		client.POST("/jobs/:job_id/images", job_image_handler.CreateJobImage) // Good
+		client.DELETE("/jobs/images/:id", job_image_handler.DeleteJobImage)   // Good
 
-		client.GET("/bids/:job_id", job_bid_handler.GetBidsByJob)
-		client.PUT("/bids/:id/status", job_bid_handler.UpdateBidStatus)
+		client.GET("/bids/:job_id", job_bid_handler.GetBidsByJob)       // Good
+		client.PUT("/bids/:id/status", job_bid_handler.UpdateBidStatus) // Good
 
-		client.POST("/jobs/:job_id/invitations/:business_id", job_invitation_handler.CreateInvitation)
-		client.PUT("/invitations/:id/status", job_invitation_handler.UpdateInvitationStatus)
-		client.GET("/jobs/:job_id/invitations", job_invitation_handler.GetInvitationsByJob)
-		client.GET("/jobs/:job_id/user/:user_id/invitation", job_invitation_handler.GetInvitationsByJobUserID)
+		client.POST("/jobs/:job_id/invitations/:business_id", job_invitation_handler.CreateInvitation)         // Good
+		client.PUT("/invitations/:id/status", job_invitation_handler.UpdateInvitationStatus)                   // Good
+		client.GET("/jobs/:job_id/invitations", job_invitation_handler.GetInvitationsByJob)                    // Good
+		client.GET("/jobs/:job_id/user/:user_id/invitation", job_invitation_handler.GetInvitationsByJobUserID) // Good
 
-		client.GET("/jobs/user/:user_id", user_profile_handler.GetUserProfile)
+		client.GET("/jobs/user/:user_id", user_profile_handler.GetUserProfile) // Good
 
 	}
 
@@ -264,27 +262,27 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	events := api.Group("/events")
 	events.Use(middleware.AuthMiddleware(cfg.JWT.SecretKey))
 	{
-		events.POST("", event_handler.CreateEvent)
-		events.PUT("/:id", event_handler.UpdateEvent)
-		events.GET("", event_handler.GetEventsByDay)
-		events.DELETE("/:id", event_handler.DeleteEvent)
+		events.POST("", event_handler.CreateEvent)       // Good
+		events.PUT("/:id", event_handler.UpdateEvent)    // Good
+		events.GET("", event_handler.GetEventsByDay)     // Good
+		events.DELETE("/:id", event_handler.DeleteEvent) // Good
 	}
 
 	messages := api.Group("/messages")
 	messages.Use(middleware.AuthMiddleware(cfg.JWT.SecretKey))
 	{
-		messages.POST("/job/:jobID", message_handler.CreateMessage)
-		messages.PUT("/:id", message_handler.UpdateMessage)
-		messages.DELETE("/:id", message_handler.DeleteMessage)
-		messages.GET("/job/:jobID", message_handler.GetConversation)
+		messages.POST("/job/:jobID", message_handler.CreateMessage)  // Good
+		messages.PUT("/:id", message_handler.UpdateMessage)          // Good
+		messages.DELETE("/:id", message_handler.DeleteMessage)       // Good
+		messages.GET("/job/:jobID", message_handler.GetConversation) // Good
 
 	}
 
 	review := api.Group("/reviews")
 	review.Use(middleware.AuthMiddleware(cfg.JWT.SecretKey))
 	{
-		review.POST("/job/:jobID", review_handler.CreateReview)
-		review.PUT("/:id", review_handler.UpdateReview)
+		review.POST("/job/:jobID", review_handler.CreateReview) // Good
+		review.PUT("/:id", review_handler.UpdateReview)         //Good
 
 	}
 	api.GET("/reviews/user/:userID", review_handler.GetReviewsOfUser)
@@ -294,10 +292,10 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	notification := api.Group("/notifications")
 	notification.Use(middleware.AuthMiddleware(cfg.JWT.SecretKey))
 	{
-		notification.GET("", notification_handler.GetByUser)
-		notification.PUT("/:id/read", notification_handler.MarkAsRead)
-		notification.DELETE("/:id", notification_handler.Delete)
-		notification.GET("/unread/count", notification_handler.GetUnreadCount)
+		notification.GET("", notification_handler.GetByUser)                   //Good
+		notification.PUT("/:id/read", notification_handler.MarkAsRead)         //Good
+		notification.DELETE("/:id", notification_handler.Delete)               //Good
+		notification.GET("/unread/count", notification_handler.GetUnreadCount) //Good
 	}
 
 	quotation := api.Group("/quotations")
@@ -332,21 +330,26 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	questions := api.Group("/questions")
 	questions.Use(middleware.AuthMiddleware(cfg.JWT.SecretKey))
 	{
-		questions.POST("", question_handler.Create)
-		questions.DELETE("/:id", question_handler.Delete)
-		questions.GET("/:id", question_handler.GetByID)
-		questions.GET("", question_handler.List)
+		questions.POST("", question_handler.Create)       //Good
+		questions.DELETE("/:id", question_handler.Delete) //Good
+	}
+	api.GET("/questions/:id", question_handler.GetByID) //Good
+
+	quest := api.Group("/questions")
+	quest.Use(middleware.GetUserID(cfg.JWT.SecretKey))
+	{
+		quest.GET("", question_handler.List) //Good
 	}
 
 	answers := api.Group("/answers")
 	answers.Use(middleware.AuthMiddleware(cfg.JWT.SecretKey), middleware.AnonIDMiddleware())
 	{
-		answers.POST("/:qid", answer_handler.Create)
-		answers.DELETE("/:id", answer_handler.Delete)
-		answers.GET("/:id", answer_handler.GetByID)
-		answers.GET("/question/:qid", answer_handler.List)
-		answers.PUT("/:id", answer_handler.Like)
+		answers.POST("/:qid", answer_handler.Create)  //Good
+		answers.DELETE("/:id", answer_handler.Delete) //Good
 	}
+	api.GET("/answers/:id", answer_handler.GetByID)        //Good
+	api.GET("/answers/question/:qid", answer_handler.List) //Good
+	api.PUT("/answers/:id", answer_handler.Like)           //Good
 
 	return r
 }

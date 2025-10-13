@@ -5,9 +5,7 @@ import api from "@/lib/axios";
 
 /* ---------------------------------- API Calls ------------------------------ */
 const fetchConversation = async (jobID: string): Promise<MessageDTO[]> => {
-  const { data } = await api.get<MessageDTO[]>(
-    `/messages/job/${jobID}`
-  );
+  const { data } = await api.get<MessageDTO[]>(`/messages/job/${jobID}`);
   return data;
 };
 
@@ -15,12 +13,9 @@ const postMessage = async (
   jobID: string,
   message: string
 ): Promise<MessageDTO> => {
-  const { data } = await api.post<MessageDTO>(
-    `/messages/job/${jobID}`,
-    {
-      message,
-    }
-  );
+  const { data } = await api.post<MessageDTO>(`/messages/job/${jobID}`, {
+    message,
+  });
   return data;
 };
 
@@ -45,7 +40,7 @@ export const useMessages = (jobID: string) => {
     queryFn: async () => {
       return await fetchConversation(jobID);
     },
-    staleTime: 30 * 1000, // cache for 30 seconds
+    staleTime: 5 * 1000,
     refetchOnWindowFocus: true,
     retry: 2,
     enabled: Boolean(jobID),

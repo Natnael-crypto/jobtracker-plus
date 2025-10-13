@@ -11,6 +11,7 @@ type JobImageRepository interface {
 	GetByJobID(jobID string) ([]models.JobImage, error)
 	GetByID(id string) (*models.JobImage, error)
 	Delete(id string) error
+	GetJobByID(jobID string) (*models.Job, error)
 }
 
 type jobImageRepository struct {
@@ -42,4 +43,14 @@ func (r *jobImageRepository) GetByID(id string) (*models.JobImage, error) {
 
 func (r *jobImageRepository) Delete(id string) error {
 	return r.db.Unscoped().Delete(&models.JobImage{}, "id = ?", id).Error
+}
+
+func (r *jobImageRepository) GetJobByID(jobID string) (*models.Job, error) {
+	var job models.Job
+	err := r.db.First(&job, "id = ?", jobID).Error
+	if err != nil {
+		return nil, err
+	}
+	return &job, nil
+
 }

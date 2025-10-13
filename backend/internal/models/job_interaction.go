@@ -28,7 +28,7 @@ type JobInvitation struct {
 	ID         string    `gorm:"type:varchar(255);primaryKey" json:"id"`
 	JobID      string    `gorm:"type:varchar(255);not null" json:"job_id"`
 	BusinessID string    `gorm:"type:varchar(255);not null" json:"business_id"`
-	Status     string    `gorm:"type:varchar(20);default:'pending';check:status IN ('pending','accepted','hired','rejected','withdrawn')" json:"status"`
+	Status     string    `gorm:"type:varchar(20);default:'pending';check:status IN ('pending','accepted','hired','rejected','withdrawn','completed')" json:"status"`
 	CreatedAt  time.Time `gorm:"default:current_timestamp" json:"created_at"`
 }
 

@@ -66,7 +66,8 @@ func (h *JobBidHandler) UpdateBidStatus(c *gin.Context) {
 // GET /jobs/:jobID/bids
 func (h *JobBidHandler) GetBidsByJob(c *gin.Context) {
 	jobID := c.Param("job_id")
-	bids, err := h.service.GetBidsByJob(jobID)
+	userID := c.GetString("userID")
+	bids, err := h.service.GetBidsByJob2(jobID, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -99,12 +100,13 @@ func (h *JobBidHandler) GetMyBidStat(c *gin.Context) {
 
 func (h *JobBidHandler) GetAllBidsForJobByState(c *gin.Context) {
 	jobID := c.Param("job_id")
+	userID := c.GetString("userID")
 	if jobID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "missing job ID"})
 		return
 	}
 
-	result, err := h.service.GetAllBidsForJobByState(jobID)
+	result, err := h.service.GetAllBidsForJobByState(jobID, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch job bids"})
 		return
@@ -116,8 +118,8 @@ func (h *JobBidHandler) GetAllBidsForJobByState(c *gin.Context) {
 func (h *JobBidHandler) GetBidOfUserByJobID(c *gin.Context) {
 	jobID := c.Param("job_id")
 	userID := c.Param("user_id")
-	//TODO Authorization Check
-	result, err := h.service.GetBidByUserProfileID(jobID, userID)
+	clientID := c.GetString("userID")
+	result, err := h.service.GetBidByUserProfileID(jobID, userID, clientID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch job bid"})
 		return
@@ -128,12 +130,13 @@ func (h *JobBidHandler) GetBidOfUserByJobID(c *gin.Context) {
 
 func (h *JobBidHandler) GetBidStats(c *gin.Context) {
 	jobID := c.Param("job_id")
+	userID := c.GetString("userID")
 	if jobID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "jobID is required"})
 		return
 	}
 
-	stats, err := h.service.GetBidStatsByJobID(jobID)
+	stats, err := h.service.GetBidStatsByJobID(jobID, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get bid stats"})
 		return

@@ -19,7 +19,7 @@ export const getUnreadCount = async () => {
 };
 
 export const markAsRead = async (id: string) => {
-  await api.patch(`/notifications/${id}/read`);
+  await api.put(`/notifications/${id}/read`);
 };
 
 export const deleteNotification = async (id: string) => {

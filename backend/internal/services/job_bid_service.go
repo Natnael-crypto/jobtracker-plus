@@ -149,6 +149,19 @@ func (s *JobBidService) UpdateBidStatus(bidID, status, role, userID string) erro
 }
 
 func (s *JobBidService) GetBidsByJob(jobID string) ([]models.JobBid, error) {
+
+	return s.repo.GetByJobID(jobID)
+}
+
+func (s *JobBidService) GetBidsByJob2(jobID, userID string) ([]models.JobBid, error) {
+	job, err := s.repo.GetJobByID(jobID)
+	if err != nil {
+		return nil, err
+	}
+	if job.UserID != userID {
+		return nil, errors.New("you can only update bids for your own jobs")
+	}
+
 	return s.repo.GetByJobID(jobID)
 }
 
@@ -157,10 +170,17 @@ func (s *JobBidService) GetBid(jobID, userID string) (*models.JobBid, error) {
 	return s.repo.GetByJobAndUser(jobID, userID)
 }
 
-func (s *JobBidService) GetBidByUserProfileID(jobID, userID string) (*models.JobBid, error) {
+func (s *JobBidService) GetBidByUserProfileID(jobID, userID, clientID string) (*models.JobBid, error) {
 	id, err := s.repo.GetUserID(userID)
 	if err != nil {
 		return &models.JobBid{}, err
+	}
+	job, err := s.repo.GetJobByID(jobID)
+	if err != nil {
+		return &models.JobBid{}, err
+	}
+	if job.UserID != clientID {
+		return &models.JobBid{}, errors.New("you can only update bids for your own jobs")
 	}
 
 	return s.repo.GetByJobAndUser(jobID, id)
@@ -179,13 +199,31 @@ func (s *JobBidService) GetAwardedJobs(userID string, limit, offset int) ([]mode
 	return s.repo.GetAwardedJobs(userID, limit, offset)
 }
 
-func (s *JobBidService) GetAllBidsForJobByState(jobID string) (map[string][]models.UserProfileWithRating, error) {
+func (s *JobBidService) GetAllBidsForJobByState(jobID, userID string) (map[string][]models.UserProfileWithRating, error) {
 	if jobID == "" {
 		return nil, errors.New("job ID is required")
 	}
+	job, err := s.repo.GetJobByID(jobID)
+	if err != nil {
+		return nil, err
+	}
+
+	if job.UserID != userID {
+		return nil, errors.New("you can only update bids for your own jobs")
+
+	}
+
 	return s.repo.GetAllBidsForJobByState(jobID)
 }
 
-func (s *JobBidService) GetBidStatsByJobID(jobID string) (map[string]int64, error) {
+func (s *JobBidService) GetBidStatsByJobID(jobID, userID string) (map[string]int64, error) {
+	job, err := s.repo.GetJobByID(jobID)
+	if err != nil {
+		return nil, err
+	}
+
+	if job.UserID != userID {
+		return nil, errors.New("you can only update bids for your own jobs")
+	}
 	return s.repo.GetBidStatsByJobID(jobID)
 }

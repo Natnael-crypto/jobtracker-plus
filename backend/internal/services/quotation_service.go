@@ -29,6 +29,8 @@ func (s *QuotationService) Create(ctx context.Context, userID, jobID string, dis
 		return nil, nil, errors.New("job not found")
 	}
 
+	
+
 	var subtotal float64
 	for _, item := range lineItems {
 		subtotal += float64(item.Quantity) * item.Rate

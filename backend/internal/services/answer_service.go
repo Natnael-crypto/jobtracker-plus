@@ -15,8 +15,8 @@ type AnswerService interface {
 	UpdateAnswer(ctx context.Context, userID, id, content string) (*models.Answer, error)
 	DeleteAnswer(ctx context.Context, userID, id string) error
 	ListAnswersForQuestion(ctx context.Context, questionID string, offset, limit int, sort string) ([]models.Answer, int64, error)
-	LikeAnswer(ctx context.Context, userID, answerID string) error
-	UnlikeAnswer(ctx context.Context, userID, answerID string) error
+	LikeAnswer(ctx context.Context, answerID string) error
+	UnlikeAnswer(ctx context.Context, answerID string) error
 	GetAnswerByID(ctx context.Context, id string) (*models.Answer, error)
 	HasRecordedVote(ctx context.Context, anno_id, answerID, ip string) (bool, error)
 	RecordedVote(ctx context.Context, anno_id, answerID, ip string) error
@@ -108,11 +108,11 @@ func (s *answerService) ListAnswersForQuestion(ctx context.Context, questionID s
 	return s.aRepo.ListByQuestion(ctx, questionID, offset, limit, sort)
 }
 
-func (s *answerService) LikeAnswer(ctx context.Context, userID, answerID string) error {
+func (s *answerService) LikeAnswer(ctx context.Context, answerID string) error {
 	return s.aRepo.IncrementLike(ctx, answerID)
 }
 
-func (s *answerService) UnlikeAnswer(ctx context.Context, userID, answerID string) error {
+func (s *answerService) UnlikeAnswer(ctx context.Context, answerID string) error {
 	return s.aRepo.DecrementLike(ctx, answerID)
 }
 

@@ -17,9 +17,28 @@ func NewMessageService(repo repositories.MessageRepository) *MessageService {
 	return &MessageService{repo: repo}
 }
 
-func (s *MessageService) Create(jobID, userID, text string) (*models.Message, error) {
+func (s *MessageService) Create(jobID, userID, text, role string) (*models.Message, error) {
 	if text == "" {
 		return nil, errors.New("message cannot be empty")
+	}
+
+	job, err := s.repo.GetJobByID(jobID)
+	if err != nil {
+		return nil, err
+	}
+
+	switch role {
+	case "client":
+		if job.UserID != userID {
+			return nil, errors.New("unauthorized: you do not own this job")
+		}
+	case "business":
+		bid, invite := s.repo.GetJobBidInvite(jobID, userID)
+		if bid == nil && invite == nil {
+			return nil, errors.New("unauthorized: no valid job relationship found")
+		}
+	default:
+		return nil, errors.New("unauthorized: invalid role")
 	}
 
 	msg := &models.Message{
@@ -67,7 +86,27 @@ func (s *MessageService) Delete(msgID, userID string) error {
 }
 
 // Get full conversation flow, tagging messages as "me" or "other"
-func (s *MessageService) GetConversation(jobID, requesterID string) ([]map[string]interface{}, error) {
+func (s *MessageService) GetConversation(jobID, requesterID, role string) ([]map[string]interface{}, error) {
+
+	job, err := s.repo.GetJobByID(jobID)
+	if err != nil {
+		return nil, err
+	}
+
+	switch role {
+	case "client":
+		if job.UserID != requesterID {
+			return nil, errors.New("unauthorized: you do not own this job")
+		}
+	case "business":
+		bid, invite := s.repo.GetJobBidInvite(jobID, requesterID)
+		if bid == nil && invite == nil {
+			return nil, errors.New("unauthorized: no valid job relationship found")
+		}
+	default:
+		return nil, errors.New("unauthorized: invalid role")
+	}
+
 	messages, err := s.repo.GetConversation(jobID)
 	if err != nil {
 		return nil, err

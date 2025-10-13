@@ -18,6 +18,7 @@ func NewMessageHandler(service services.MessageService) *MessageHandler {
 func (h *MessageHandler) CreateMessage(c *gin.Context) {
 	userID := c.GetString("userID")
 	jobID := c.Param("jobID")
+	role := c.GetString("role")
 
 	var req struct {
 		Message string `json:"message" binding:"required"`
@@ -27,7 +28,7 @@ func (h *MessageHandler) CreateMessage(c *gin.Context) {
 		return
 	}
 
-	msg, err := h.service.Create(jobID, userID, req.Message)
+	msg, err := h.service.Create(jobID, userID, req.Message, role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -69,8 +70,9 @@ func (h *MessageHandler) DeleteMessage(c *gin.Context) {
 func (h *MessageHandler) GetConversation(c *gin.Context) {
 	userID := c.GetString("userID")
 	jobID := c.Param("jobID")
+	role := c.GetString("role")
 
-	conversation, err := h.service.GetConversation(jobID, userID)
+	conversation, err := h.service.GetConversation(jobID, userID, role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

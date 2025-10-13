@@ -54,8 +54,9 @@ func (h *JobImageHandler) GetJobImages(c *gin.Context) {
 func (h *JobImageHandler) DeleteJobImage(c *gin.Context) {
 	imageID := c.Param("id")
 	images := strings.Split(imageID, ".")
+	userID := c.GetString("userID")
 
-	if err := h.service.DeleteJobImage(c.Request.Context(), images[0]); err != nil {
+	if err := h.service.DeleteJobImage(c.Request.Context(), images[0], userID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

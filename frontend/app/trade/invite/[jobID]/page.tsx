@@ -4,7 +4,6 @@ import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { Search, ChevronDown, Filter, User, Star, MapPin } from "lucide-react";
 import TopNav from "@/components/langing/top";
 import Footer from "@/components/langing/Footer";
-import { AllServices } from "@/data/services";
 import { useProviders } from "@/hooks/useTrade";
 import { Provider } from "@/types/trade";
 import { useParams, useSearchParams } from "next/navigation";
@@ -42,6 +41,26 @@ interface DropdownProps {
   value: string;
   onClick: () => void;
 }
+
+export const AllServices = [
+  "All",
+  "Electrical Services",
+  "Bathroom Fitting",
+  "Building & Construction",
+  "Carpentry & Joinery",
+  "Cleaning Services",
+  "Flooring",
+  "Gardening & Landscaping",
+  "Handyman",
+  "Heating & Gas Work",
+  "Painting & Decorating",
+  "Plastering & Rendering",
+  "Plumbing",
+  "Roofing",
+  "Tiling",
+  "Mover",
+  "Other Services",
+];
 
 const FilterDropdown: React.FC<DropdownProps> = ({ label, value, onClick }) => (
   <div

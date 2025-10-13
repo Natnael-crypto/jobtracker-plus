@@ -62,8 +62,9 @@ func (h *JobInvitationHandler) GetInvitationsByUser(c *gin.Context) {
 
 func (h *JobInvitationHandler) GetInvitationsByJob(c *gin.Context) {
 	jobID := c.Param("job_id")
+	userID := c.GetString("userID")
 
-	invites, err := h.service.GetInvitationsByJob(jobID)
+	invites, err := h.service.GetInvitationsByJob(jobID, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -74,8 +75,9 @@ func (h *JobInvitationHandler) GetInvitationsByJob(c *gin.Context) {
 func (h *JobInvitationHandler) GetInvitationsByJobUserID(c *gin.Context) {
 	jobID := c.Param("job_id")
 	userID := c.Param("user_id")
+	clientID := c.GetString("userID")
 
-	invite, err := h.service.GetInvitationsByJobUserID(jobID, userID)
+	invite, err := h.service.GetInvitationsByJobUserID(jobID, userID, clientID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -35,6 +35,12 @@ func (h *QuestionHandler) Create(c *gin.Context) {
 		return
 	}
 	userID := c.GetString("userID")
+	role := c.GetString("role")
+	if role == "business" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+		return
+	}
+
 	if userID == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthenticated"})
 		return
@@ -117,6 +123,12 @@ func (h *QuestionHandler) Delete(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthenticated"})
 		return
 	}
+	role := c.GetString("role")
+	if role == "business" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+		return
+	}
+
 	id := c.Param("id")
 	if err := h.svc.DeleteQuestion(c.Request.Context(), userID, id); err != nil {
 		switch err {

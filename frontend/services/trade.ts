@@ -21,6 +21,12 @@ export async function listProviders(
   if (typeof opts.offset === "number") params.offset = opts.offset;
   if (opts.search) params.search = opts.search;
 
+  if (opts.services?.length! > 0) {
+    if (opts.services!.includes("All")) {
+      delete params.services;
+    }
+  }
+
   const res = await api.get<ListProvidersResponse>("/trade", { params });
   return res.data;
 }

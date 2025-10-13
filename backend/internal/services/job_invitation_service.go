@@ -29,7 +29,7 @@ func (s *JobInvitationService) CreateInvitation(jobID, businessID, role, userID 
 		return nil, errors.New("job not found")
 	}
 
-	if job.UserID == businessID {
+	if job.UserID != userID {
 		return nil, errors.New("cannot invite yourself to your own job")
 	}
 
@@ -109,10 +109,6 @@ func (s *JobInvitationService) UpdateInvitationStatus(inviteID, status, role, us
 		}
 
 	case "client":
-		job, err := s.jobRepo.GetJobByID(invite.JobID)
-		if err != nil {
-			return errors.New("job not found")
-		}
 		if job.UserID != userID {
 			return errors.New("you can only update invitations for your own jobs")
 		}
@@ -147,11 +143,25 @@ func (s *JobInvitationService) GetInvitationsByUser(businessID string) ([]models
 	return s.repo.GetByUser(businessID)
 }
 
-func (s *JobInvitationService) GetInvitationsByJob(jobID string) ([]models.JobInvitation, error) {
+func (s *JobInvitationService) GetInvitationsByJob(jobID, userID string) ([]models.JobInvitation, error) {
+	job, err := s.repo.GetJobByID(jobID)
+	if err != nil {
+		return nil, err
+	}
+	if job.UserID != userID {
+		return nil, errors.New("you can only update bids for your own jobs")
+	}
 	return s.repo.GetByJob(jobID)
 }
 
-func (s *JobInvitationService) GetInvitationsByJobUserID(jobID, userID string) (*models.JobInvitation, error) {
+func (s *JobInvitationService) GetInvitationsByJobUserID(jobID, userID, clientID string) (*models.JobInvitation, error) {
+	job, err := s.repo.GetJobByID(jobID)
+	if err != nil {
+		return nil, err
+	}
+	if job.UserID != clientID {
+		return nil, errors.New("you can only update bids for your own jobs")
+	}
 	return s.repo.GetInvitationsByJobUserID(jobID, userID)
 }
 

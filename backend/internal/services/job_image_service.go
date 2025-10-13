@@ -6,6 +6,7 @@ import (
 	"backend/internal/utils"
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"mime/multipart"
 	"path/filepath"
@@ -26,12 +27,30 @@ func NewJobImageService(repo repositories.JobImageRepository, s3 utils.S3Service
 
 // Upload & save job image
 func (s *JobImageService) CreateJobImage(ctx context.Context, userID, jobID string, file multipart.File, header *multipart.FileHeader) (*models.JobImage, error) {
+
+	job, err := s.repo.GetJobByID(jobID)
+
+	if err == nil {
+		if job.UserID != userID {
+			return nil, errors.New("you can only update images for your own jobs")
+		}
+	}
+
+	images, err := s.repo.GetByJobID(jobID)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(images) > 10 {
+		return nil, errors.New("you can only upload 10 images")
+	}
+
 	ext := strings.TrimPrefix(filepath.Ext(header.Filename), ".")
 	contentType := header.Header.Get("Content-Type")
 
 	// read file into buffer
 	buf := new(bytes.Buffer)
-	_, err := buf.ReadFrom(file)
+	_, err = buf.ReadFrom(file)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
@@ -66,10 +85,17 @@ func (s *JobImageService) GetJobImages(jobID string) ([]models.JobImage, error) 
 	return s.repo.GetByJobID(jobID)
 }
 
-func (s *JobImageService) DeleteJobImage(ctx context.Context, imageID string) error {
+func (s *JobImageService) DeleteJobImage(ctx context.Context, imageID, userID string) error {
 	image, err := s.repo.GetByID(imageID)
 	if err != nil {
 		return fmt.Errorf("image not found: %w", err)
+	}
+	job, err := s.repo.GetJobByID(image.JobID)
+	if err != nil {
+		return fmt.Errorf("job not found: %w", err)
+	}
+	if job.UserID != userID {
+		return errors.New("you can only delete images for your own jobs")
 	}
 
 	return s.repo.Delete(image.ID)
