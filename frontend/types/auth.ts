@@ -29,3 +29,20 @@ export interface DeleteUserRequest {
 export interface DeleteUserResponse {
   message: string;
 }
+
+
+export interface PasswordResetRequestPayload {
+  email: string;
+}
+
+export interface PasswordResetConfirmPayload {
+  email: string;
+  code: string;
+  new_password: string;
+}
+
+export interface ApiResponse {
+  success?: boolean;
+  message?: string;
+  error?: string;
+}

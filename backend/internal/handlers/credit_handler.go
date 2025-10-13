@@ -16,12 +16,13 @@ import (
 )
 
 type CreditHandler struct {
-	service services.CreditService
-	cfg     *config.Config
+	service      services.CreditService
+	cfg          *config.Config
+	notification *services.NotificationService
 }
 
-func NewCreditHandler(service services.CreditService, cfg *config.Config) *CreditHandler {
-	return &CreditHandler{service: service, cfg: cfg}
+func NewCreditHandler(service services.CreditService, cfg *config.Config, notification *services.NotificationService) *CreditHandler {
+	return &CreditHandler{service: service, cfg: cfg, notification: notification}
 }
 
 func (h *CreditHandler) GetCredit(c *gin.Context) {
@@ -128,6 +129,7 @@ func (h *CreditHandler) HandleStripeWebhook(c *gin.Context) {
 			amount, _ := strconv.Atoi(session.Metadata["amount"])
 			_ = h.service.AddCredits(userID, amount)
 			_ = h.service.CreateCreditHistory(userID, amount)
+			h.notification.Create(c.Request.Context(), userID, "Credit Purchase Successful", "Your credit purchase was successful. You can now use your balance to submit more job bids or upgrade your plan.")
 		}
 	}
 

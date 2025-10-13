@@ -98,7 +98,7 @@ func (s *InvoiceService) Create(ctx context.Context,
 		return nil, nil, err
 	}
 
-	s.notification.Create(context.Background(), userID, "Invoice Created", "Invoice created for job")
+	s.notification.Create(context.Background(), userID, "Invoice Received", "You’ve received a new invoice for "+jobTitle+" job. Review and process the payment securely.")
 
 	return invoices, lineItemsList, nil
 }

@@ -3,17 +3,19 @@ package services
 import (
 	"backend/internal/models"
 	"backend/internal/repositories"
+	"context"
 	"errors"
 	"fmt"
 	"time"
 )
 
 type JobService struct {
-	repo repositories.JobRepository
+	repo                repositories.JobRepository
+	NotificationService *NotificationService
 }
 
-func NewJobService(repo repositories.JobRepository) *JobService {
-	return &JobService{repo: repo}
+func NewJobService(repo repositories.JobRepository, NotificationService *NotificationService) *JobService {
+	return &JobService{repo: repo, NotificationService: NotificationService}
 }
 
 // Create job
@@ -42,6 +44,8 @@ func (s *JobService) Create(userID, role, id, category, specific, description, h
 	if err := s.repo.Create(job); err != nil {
 		return nil, fmt.Errorf("failed to create job: %w", err)
 	}
+
+	s.NotificationService.Create(context.Background(), userID, "Your Job Has Been Created", "Your new job posting is live! Business users can now view and submit their proposals.")
 	return job, nil
 }
 

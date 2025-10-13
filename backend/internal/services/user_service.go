@@ -74,13 +74,13 @@ func (s *UserService) Register(email, password, role, first_name, last_name, pho
 
 	_, _ = s.UserProfileService.CreateProfile(user.ID, first_name, last_name, phone_number)
 
-	message := "Welcome to JobTracker Please Fill Out Your Profile"
+	message := "We're excited to have you on board. Start exploring opportunities and manage your jobs seamlessly."
 
 	if user.Role == "business" {
-		message = "Welcome to JobTracker Please Fill Out Your Business Profile"
+		message = "We're excited to have you on board. Start exploring opportunities and manage your jobs seamlessly."
 	}
 
-	s.Notification.Create(context.Background(), user.ID, "Welcome to JobTracker", message)
+	s.Notification.Create(context.Background(), user.ID, "Welcome to JobTracker!", message)
 	return user, nil
 }
 

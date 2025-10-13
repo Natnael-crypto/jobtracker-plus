@@ -134,15 +134,15 @@ func (s *JobBidService) UpdateBidStatus(bidID, status, role, userID string) erro
 	}
 
 	if status == "shortlisted" {
-		s.notification.Create(context.Background(), bid.UserID, "Job Shortlisted", "You have been shortlisted for the job "+job.Headline)
+		s.notification.Create(context.Background(), bid.UserID, "You’ve Been Shortlisted", "Great news! A client has shortlisted your bid for "+job.Headline+" job. Stay alert for further updates.")
 	}
 
 	if status == "hired" {
-		s.notification.Create(context.Background(), bid.UserID, "Job Hired", "You have been hired for the job "+job.Headline)
+		s.notification.Create(context.Background(), bid.UserID, "You’ve Been Awarded a Job!", "Congratulations! A client has awarded you "+job.Headline+" job. Check the job details and get started right away.")
 	}
 
 	if status == "completed" {
-		s.notification.Create(context.Background(), bid.UserID, "Job Completed", job.Headline+" has been completed")
+		s.notification.Create(context.Background(), bid.UserID, "Job Marked as Completed", job.Headline+" job has been successfully marked as completed. Remember to request or provide feedback!")
 	}
 
 	return nil

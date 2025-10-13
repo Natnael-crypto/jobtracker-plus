@@ -110,7 +110,7 @@ const TopNav = () => {
               >
                 Trade Signup
               </Link>
-            )}
+            )} 
             {user ? (
               <Link
                 href={

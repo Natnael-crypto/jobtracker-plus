@@ -31,3 +31,12 @@ func (r *UserVerificationRepository) GetByUserID(userID string, vType string) (*
 func (r *UserVerificationRepository) UpdateVerified(id string, verified bool) error {
 	return r.DB.Model(&models.UserVerification{}).Where("id = ?", id).Update("verified", verified).Error
 }
+
+func (r *UserVerificationRepository) GetBySessionID(sessionID string) (*models.UserVerification, error) {
+	var v *models.UserVerification
+	err := r.DB.Where("session_id = ?", sessionID).First(&v).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return v, nil
+	}
+	return v, err
+}

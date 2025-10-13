@@ -24,6 +24,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	}))
 
 	s3Service := utils.NewS3Service(utils.AWSConfig(cfg.AWS))
+	// emailService := email.NewEmailService(cfg.Email)
 
 	notification_repo := repositories.NewNotificationRepository(db)
 	notification_service := services.NewNotificationService(notification_repo)
@@ -38,7 +39,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	userRepo := repositories.NewUserRepository(db)
 
 	credit_service := services.NewCreditService(credit_repo, *userRepo)
-	credit_handler := handlers.NewCreditHandler(*credit_service, cfg)
+	credit_handler := handlers.NewCreditHandler(*credit_service, cfg, notification_service)
 
 	userService := services.NewUserService(userRepo, cfg.JWT.SecretKey, user_profile_service, credit_service, notification_service)
 	userHandler := handlers.NewUserHandler(userService, frontendURL)
@@ -72,7 +73,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	portfolio_handler := handlers.NewPortfolioHandler(*portfolio_service)
 
 	job_repo := repositories.NewJobRepository(db)
-	job_service := services.NewJobService(job_repo)
+	job_service := services.NewJobService(job_repo, notification_service)
 
 	job_address_repo := repositories.NewJobAddressRepository(db)
 	job_address_service := services.NewJobAddressService(job_address_repo, cfg.Geocode.APIKey, job_repo)
@@ -91,7 +92,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	message_handler := handlers.NewMessageHandler(*message_service)
 
 	review_repo := repositories.NewReviewRepository(db)
-	review_service := services.NewReviewService(review_repo)
+	review_service := services.NewReviewService(review_repo, notification_service)
 	review_handler := handlers.NewReviewHandler(*review_service)
 
 	job_bid_repo := repositories.NewJobBidRepository(db)
@@ -105,7 +106,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	job_handler := handlers.NewJobHandler(job_service, *job_address_service, *job_image_service, *job_bid_service, *job_invitation_service)
 
 	quotation_repo := repositories.NewQuotationRepository(db)
-	quotation_service := services.NewQuotationService(quotation_repo)
+	quotation_service := services.NewQuotationService(quotation_repo, notification_service)
 	quotation_handler := handlers.NewQuotationHandler(*quotation_service)
 
 	invoice_repo := repositories.NewInvoiceRepository(db)

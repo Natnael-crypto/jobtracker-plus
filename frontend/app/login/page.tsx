@@ -12,16 +12,12 @@ export default function Login() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  // --- Sanitize redirect path ---
-
   const { mutateAsync: login, isPending: isLoading } = useLogin();
 
-  // --- Controlled input handler ---
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  // --- Utility: Wait for session initialization ---
   async function waitForSession(timeout = 3000, interval = 200) {
     const start = Date.now();
 
@@ -32,9 +28,7 @@ export default function Login() {
         if (user?.data?.role) {
           return user.data;
         }
-      } catch {
-        // Ignore transient network/session errors during wait
-      }
+      } catch {}
 
       await new Promise((res) => setTimeout(res, interval));
     }
@@ -42,7 +36,6 @@ export default function Login() {
     throw new Error("Session not ready after login");
   }
 
-  // --- Main submit handler ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -64,7 +57,6 @@ export default function Login() {
         return;
       }
 
-      // --- Wait 1s to ensure session cookie/JWT is set ---
       await new Promise((r) => setTimeout(r, 1000));
 
       const user = await waitForSession();
@@ -140,6 +132,15 @@ export default function Login() {
                 autoComplete="current-password"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
               />
+            </div>
+
+            <div className="flex justify-end">
+              <a
+                href="/reset-password"
+                className="text-sm text-blue-500 hover:text-black font-medium"
+              >
+                Forgot password?
+              </a>
             </div>
 
             <button

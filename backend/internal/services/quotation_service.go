@@ -12,16 +12,21 @@ import (
 )
 
 type QuotationService struct {
-	repo repositories.QuotationRepository
+	repo         repositories.QuotationRepository
+	notification *NotificationService
 }
 
-func NewQuotationService(repo repositories.QuotationRepository) *QuotationService {
-	return &QuotationService{repo: repo}
+func NewQuotationService(repo repositories.QuotationRepository, notification *NotificationService) *QuotationService {
+	return &QuotationService{repo: repo, notification: notification}
 }
 
 func (s *QuotationService) Create(ctx context.Context, userID, jobID string, discount, tax float64, terms string, street, city, state, country, phone, email, logoURL, jobTitle string, lineItems []models.LineItemRequest) (*models.Quotation, []models.LineItem, error) {
 	if jobID == "" {
 		return nil, nil, errors.New("jobID is required")
+	}
+	job, err := s.repo.GetJobByID(ctx, jobID)
+	if err != nil {
+		return nil, nil, errors.New("job not found")
 	}
 
 	var subtotal float64
@@ -71,6 +76,7 @@ func (s *QuotationService) Create(ctx context.Context, userID, jobID string, dis
 		return nil, nil, err
 	}
 
+	s.notification.Create(context.Background(), job.UserID, "Quotation Received", "A business user has sent you a quotation for "+job.Headline+" job. Review the offer and take the next step.")
 	return s.repo.GetByID(ctx, quotation.ID)
 }
 

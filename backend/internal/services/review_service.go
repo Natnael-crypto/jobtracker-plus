@@ -3,6 +3,7 @@ package services
 import (
 	"backend/internal/models"
 	"backend/internal/repositories"
+	"context"
 	"errors"
 	"time"
 
@@ -10,11 +11,12 @@ import (
 )
 
 type ReviewService struct {
-	repo repositories.ReviewRepository
+	repo         repositories.ReviewRepository
+	notification *NotificationService
 }
 
-func NewReviewService(repo repositories.ReviewRepository) *ReviewService {
-	return &ReviewService{repo: repo}
+func NewReviewService(repo repositories.ReviewRepository, notification *NotificationService) *ReviewService {
+	return &ReviewService{repo: repo, notification: notification}
 }
 
 func (s *ReviewService) Create(jobID, reviewerID string, rate int, comment, userID string) (*models.Review, error) {
@@ -49,6 +51,7 @@ func (s *ReviewService) Create(jobID, reviewerID string, rate int, comment, user
 	if err := s.repo.Create(review); err != nil {
 		return nil, err
 	}
+	s.notification.Create(context.Background(), userID, "You’ve Received a Review", "A client has shared a review on your completed "+job.Headline+" job. Check it out on your profile.")
 	return review, nil
 }
 

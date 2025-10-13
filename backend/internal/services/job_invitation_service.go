@@ -54,7 +54,7 @@ func (s *JobInvitationService) CreateInvitation(jobID, businessID, role, userID 
 		return nil, err
 	}
 
-	s.notification.Create(context.Background(), businessID, "Job Invitation", "You have been invited to join the job"+job.Headline)
+	s.notification.Create(context.Background(), businessID, "New Job Invitation", "You’ve been invited to apply for a job that fits your skills. Review the details and accept if you’re interested. Job Title: "+job.Headline)
 
 	return invite, nil
 }
@@ -62,6 +62,11 @@ func (s *JobInvitationService) CreateInvitation(jobID, businessID, role, userID 
 // UpdateInvitationStatus - business can accept/withdraw, client can hire/reject
 func (s *JobInvitationService) UpdateInvitationStatus(inviteID, status, role, userID string) error {
 	invite, err := s.repo.GetByID(inviteID)
+	if err != nil {
+		return err
+	}
+
+	job, err := s.repo.GetJobByID(invite.JobID)
 	if err != nil {
 		return err
 	}
@@ -99,6 +104,8 @@ func (s *JobInvitationService) UpdateInvitationStatus(inviteID, status, role, us
 			if err != nil {
 				return errors.New("user does not have enough credits")
 			}
+
+			s.notification.Create(context.Background(), job.UserID, "Your Invitation Was Accepted", "The business user you invited has accepted your job invitation. You can now proceed with job discussions.")
 		}
 
 	case "client":
@@ -121,7 +128,7 @@ func (s *JobInvitationService) UpdateInvitationStatus(inviteID, status, role, us
 		if err != nil {
 			return err
 		}
-		s.notification.Create(context.Background(), invite.BusinessID, "Job Hired", "You have been hired for the job "+invite.JobID)
+		s.notification.Create(context.Background(), invite.BusinessID, "You’ve Been Awarded a Job!", "Congratulations! A client has awarded you their job. Check the job details and get started right away. ")
 	}
 
 	if status == "completed" {
@@ -129,7 +136,7 @@ func (s *JobInvitationService) UpdateInvitationStatus(inviteID, status, role, us
 		if err != nil {
 			return err
 		}
-		s.notification.Create(context.Background(), invite.BusinessID, "Job Completed", invite.JobID+" has been completed")
+		s.notification.Create(context.Background(), invite.BusinessID, "Job Marked as Completed", job.Headline+" job has been successfully marked as completed. Remember to request or provide feedback!")
 
 	}
 

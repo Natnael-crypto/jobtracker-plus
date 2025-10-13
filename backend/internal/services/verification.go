@@ -5,6 +5,7 @@ import (
 	"backend/internal/models"
 	"backend/internal/repositories"
 	"bytes"
+	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
@@ -15,8 +16,9 @@ import (
 )
 
 type VerificationService struct {
-	Repo *repositories.UserVerificationRepository
-	Conf config.Config
+	Repo                *repositories.UserVerificationRepository
+	Conf                config.Config
+	NotificationService *NotificationService
 }
 
 func NewVerificationService(repo *repositories.UserVerificationRepository, Conf config.Config) *VerificationService {
@@ -121,7 +123,13 @@ func (s *VerificationService) HandleWebhook(headers http.Header, rawBody []byte)
 		if err := s.Repo.UpdateVerified(sessionID, true); err != nil {
 			return fmt.Errorf("failed to update verification: %v", err)
 		}
+		verify, err := s.Repo.GetBySessionID(sessionID)
+		if err != nil {
+			return fmt.Errorf("failed to get user by session ID: %v", err)
+		}
+
 		fmt.Printf("User verification updated successfully for session %s\n", sessionID)
+		s.NotificationService.Create(context.Background(), verify.UserID, "Welcome to JobTracker!", "")
 	}
 	return nil
 }

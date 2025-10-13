@@ -15,6 +15,7 @@ type QuotationRepository interface {
 	GetByUser(ctx context.Context, userID, jobID string) ([]models.Quotation, error)
 	GetByQuoteID(ctx context.Context, id string) (*models.Quotation, []models.LineItem, error)
 	Update(ctx context.Context, quotation *models.Quotation) error
+	GetJobByID(ctx context.Context, jobID string) (*models.Job, error)
 }
 
 type quotationRepository struct {
@@ -41,6 +42,14 @@ func (r *quotationRepository) Create(ctx context.Context, quotation *models.Quot
 		}
 		return nil
 	})
+}
+
+func (r *quotationRepository) GetJobByID(ctx context.Context, jobID string) (*models.Job, error) {
+	var job models.Job
+	if err := r.db.WithContext(ctx).First(&job, "id = ?", jobID).Error; err != nil {
+		return nil, err
+	}
+	return &job, nil
 }
 
 func (r *quotationRepository) GetByID(ctx context.Context, id string) (*models.Quotation, []models.LineItem, error) {
