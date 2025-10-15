@@ -5,10 +5,11 @@ import ImageGallery from "@/components/common/ImageGallery";
 import LoadingPage from "@/components/common/LoadingPage";
 import Footer from "@/components/langing/Footer";
 import TopNav from "@/components/langing/top";
+import { useAddProfileView } from "@/hooks/useDashboard";
 import { useProvider } from "@/hooks/useTrade";
 import { ProviderDetail } from "@/types/trade";
 import { useParams } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const UserIcon = (props: { className?: string }) => (
   <svg
@@ -216,6 +217,14 @@ const TradePersonProfile: React.FC = () => {
   const params = useParams();
   const id = params.id as string;
   const { data, isLoading, isError, error } = useProvider(id);
+  const { mutate: addProfileView } = useAddProfileView();
+
+  useEffect(() => {
+    if (data) {
+      addProfileView(id);
+    }
+  }, [data]);
+
   return (
     <div className="min-h-screen bg-white">
       <TopNav />

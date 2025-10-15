@@ -142,11 +142,12 @@ const BusinessSidebar: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-6 border-b">
         {!collapsed && (
-          <a href="/">
-            <h1 className="text-xl font-bold text-gray-800">
-              JOBTRACKER <span className="text-green-500">+</span>
-            </h1>
-          </a>
+          <Link
+            href="/"
+            className="text-lg font-medium tracking-widest text-gray-900"
+          >
+            JOBTRACKER <span className="text-green-500">+</span>
+          </Link>
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
@@ -231,9 +232,12 @@ const BusinessSidebar: React.FC = () => {
 
       {/* Mobile Header */}
       <div className="flex items-center justify-between p-4 bg-white shadow-md md:hidden fixed top-0 left-0 right-0 z-40">
-        <h1 className="text-lg font-bold text-gray-800">
+        <Link
+          href="/"
+          className="text-lg font-medium tracking-widest text-gray-900"
+        >
           JOBTRACKER <span className="text-green-500">+</span>
-        </h1>
+        </Link>
         <button
           onClick={() => setMobileOpen(true)}
           className="p-2 text-gray-700"

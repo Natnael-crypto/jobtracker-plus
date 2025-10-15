@@ -110,13 +110,15 @@ const TopNav = () => {
               >
                 Trade Signup
               </Link>
-            )} 
+            )}
             {user ? (
               <Link
                 href={
                   user.data.role === "business"
                     ? "/business/profile"
-                    : "/client/profile"
+                    : user.data.role === "admin"
+                    ? "/admin"
+                    : "client/profile"
                 }
               >
                 <img
@@ -220,7 +222,9 @@ const TopNav = () => {
                     href={
                       user.data.role === "business"
                         ? "/business/profile"
-                        : "/client/profile"
+                        : user.data.role === "admin"
+                        ? "/admin"
+                        : "client/profile"
                     }
                     onClick={() => setMobileOpen(false)}
                     className="flex items-center gap-3 py-2 rounded-lg px-3 hover:bg-gray-50 items-center mx-auto"
