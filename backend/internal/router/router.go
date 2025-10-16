@@ -128,6 +128,18 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	verification_service := services.NewVerificationService(verification_repo, *cfg)
 	verification_handler := handlers.NewVerificationHandler(verification_service, cfg.BaseUrl.FrontEndUrl)
 
+	dashBoard_repo := repositories.NewDashBoardRepository(db)
+	dashBoard_service := services.NewDashBoardAnalytics(dashBoard_repo)
+	dashBoard_handler := handlers.NewDashBoardAnalyticsHandler(*dashBoard_service)
+
+	admin_user_repo := repositories.NewAdminUserRepository(db)
+	admin_user_service := services.AdminNewUserService(admin_user_repo)
+	admin_user_handler := handlers.NewAdminUserHandler(admin_user_service)
+
+	admin_jobs_repo := repositories.NewAdminJobRepository(db)
+	admin_jobs_service := services.NewAdminJobServices(admin_jobs_repo)
+	admin_jobs_handler := handlers.NewAdminJobHandlers(admin_jobs_service)
+
 	// TODO Add Authorization
 
 	api := r.Group("/api")
@@ -350,6 +362,24 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	api.GET("/answers/:id", answer_handler.GetByID)        //Good
 	api.GET("/answers/question/:qid", answer_handler.List) //Good
 	api.PUT("/answers/:id", answer_handler.Like)           //Good
+
+	dashboard := api.Group("/dashboard")
+	dashboard.Use(middleware.AuthMiddleware(cfg.JWT.SecretKey))
+	{
+		dashboard.GET("/business", dashBoard_handler.GetBusinessDashboard)
+		dashboard.GET("/profile", dashBoard_handler.GetProfileView)
+	}
+
+	api.POST("/profile/:user_id", dashBoard_handler.AddProfileView)
+
+	admin := api.Group("/admin")
+	admin.Use(middleware.AuthMiddleware(cfg.JWT.SecretKey), middleware.RoleMiddleware("admin"))
+	{
+		admin.GET("/users", admin_user_handler.GetUsers)
+		admin.GET("/users/:id/client", admin_user_handler.GetUserByIDClient)
+		admin.GET("/users/:id/business", admin_user_handler.GetUserByIDBusiness)
+		admin.GET("/jobs", admin_jobs_handler.GetJobs)
+	}
 
 	return r
 }

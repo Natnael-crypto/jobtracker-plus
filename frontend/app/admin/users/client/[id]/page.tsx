@@ -161,7 +161,7 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
                                   {bid.user_detail.last_name}
                                 </p>
                                 <p className="text-xs text-gray-500">
-                                  {bid.user_detail.phone_number}
+                                  {bid.user_detail.phone}
                                 </p>
                               </div>
                             </div>
@@ -203,7 +203,7 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
                                       {invite.user_detail?.last_name}
                                     </p>
                                     <p className="text-xs text-gray-500">
-                                      {invite.user_detail?.phone_number}
+                                      {invite.user_detail?.phone}
                                     </p>
                                   </div>
                                 </div>
