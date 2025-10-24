@@ -27,7 +27,7 @@ type updateAnswerReq struct {
 func (h *AnswerHandler) Create(c *gin.Context) {
 	var req createAnswerReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": ""})
 		return
 	}
 	role := c.GetString("role")
@@ -43,7 +43,7 @@ func (h *AnswerHandler) Create(c *gin.Context) {
 	qid := c.Param("qid")
 	ans, err := h.svc.CreateAnswer(c.Request.Context(), userID, qid, req.Content)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": ""})
 		return
 	}
 	c.JSON(http.StatusCreated, ans)
@@ -56,7 +56,7 @@ func (h *AnswerHandler) List(c *gin.Context) {
 	sort := c.Query("sort")
 	list, total, err := h.svc.ListAnswersForQuestion(c.Request.Context(), qid, offset, limit, sort)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": ""})
 		return
 	}
 	utils.WritePaginatedResponse(c, list, page, limit, int(total))
@@ -70,7 +70,7 @@ func (h *AnswerHandler) GetByID(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "answer not found"})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": ""})
 		return
 	}
 	c.JSON(http.StatusOK, ans)
@@ -79,7 +79,7 @@ func (h *AnswerHandler) GetByID(c *gin.Context) {
 func (h *AnswerHandler) Update(c *gin.Context) {
 	var req updateAnswerReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": ""})
 		return
 	}
 	userID := c.GetString("userID")
@@ -96,7 +96,7 @@ func (h *AnswerHandler) Update(c *gin.Context) {
 		case services.ErrUnauthorized:
 			c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
 		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": ""})
 		}
 		return
 	}
@@ -117,7 +117,7 @@ func (h *AnswerHandler) Delete(c *gin.Context) {
 		case services.ErrUnauthorized:
 			c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
 		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": ""})
 		}
 		return
 	}
@@ -141,7 +141,7 @@ func (h *AnswerHandler) Like(c *gin.Context) {
 
 	hasVoted, err := h.svc.HasRecordedVote(c, anno_id, answerID, ip)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": ""})
 		return
 	}
 	if hasVoted {
@@ -149,12 +149,12 @@ func (h *AnswerHandler) Like(c *gin.Context) {
 		return
 	}
 	if err := h.svc.RecordedVote(c, anno_id, answerID, ip); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": ""})
 		return
 	}
 
 	if err := h.svc.LikeAnswer(c, answerID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": ""})
 		return
 	}
 

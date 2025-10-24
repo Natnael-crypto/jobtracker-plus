@@ -28,19 +28,19 @@ func (h *UserHandler) Register(c *gin.Context) {
 	}
 	red := c.Query("redirect")
 	if err := c.ShouldBindJSON(&req); err != nil {
-		utils.RespondError(c, http.StatusBadRequest, "invalid request", err.Error())
+		utils.RespondError(c, http.StatusBadRequest, "invalid request",  "")
 		return
 	}
 
 	_, err := h.Service.Register(req.Email, req.Password, req.Role, req.FirstName, req.LastName, req.PhoneNumber)
 	if err != nil {
-		utils.RespondError(c, http.StatusUnauthorized, "unable to register user", err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, "unable to register user",  "")
 		return
 	}
 
 	token, err := h.Service.Login(req.Email, req.Password)
 	if err != nil {
-		utils.RespondError(c, http.StatusUnauthorized, "invalid credentials", err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, "invalid credentials",  "")
 		return
 	}
 
@@ -68,13 +68,13 @@ func (h *UserHandler) Login(c *gin.Context) {
 	}
 	red := c.Query("redirect")
 	if err := c.ShouldBindJSON(&req); err != nil {
-		utils.RespondError(c, http.StatusBadRequest, "invalid request", err.Error())
+		utils.RespondError(c, http.StatusBadRequest, "invalid request",  "")
 		return
 	}
 
 	token, err := h.Service.Login(req.Email, req.Password)
 	if err != nil {
-		utils.RespondError(c, http.StatusUnauthorized, "invalid credentials", err.Error())
+		utils.RespondError(c, http.StatusUnauthorized, "invalid credentials",  "")
 		return
 	}
 
@@ -103,7 +103,7 @@ func (h *UserHandler) CheckEmail(c *gin.Context) {
 
 	exists, err := h.Service.CheckEmailExists(email)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 
@@ -137,12 +137,12 @@ func (h *UserHandler) ChangePassword(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		utils.RespondError(c, http.StatusBadRequest, "invalid request", err.Error())
+		utils.RespondError(c, http.StatusBadRequest, "invalid request", "")
 		return
 	}
 
 	if err := h.Service.ChangePassword(userID, req.OldPassword, req.NewPassword); err != nil {
-		utils.RespondError(c, http.StatusBadRequest, "unable to change password", err.Error())
+		utils.RespondError(c, http.StatusBadRequest, "unable to change password", "")
 		return
 	}
 
@@ -155,12 +155,12 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 		Password string `json:"password"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		utils.RespondError(c, http.StatusBadRequest, "invalid request", err.Error())
+		utils.RespondError(c, http.StatusBadRequest, "invalid request", "")
 		return
 	}
 
 	if err := h.Service.DeleteUser(userID, req.Password); err != nil {
-		utils.RespondError(c, http.StatusBadRequest, "unable to delete user", err.Error())
+		utils.RespondError(c, http.StatusBadRequest, "unable to delete user", "")
 		return
 	}
 
@@ -172,7 +172,7 @@ func (h *UserHandler) BlockUser(c *gin.Context) {
 	targetID := c.Param("id")
 
 	if err := h.Service.BlockUser(adminID, targetID); err != nil {
-		utils.RespondError(c, http.StatusForbidden, "unable to block user", err.Error())
+		utils.RespondError(c, http.StatusForbidden, "unable to block user", "")
 		return
 	}
 
@@ -183,7 +183,7 @@ func (h *UserHandler) UserDetail(c *gin.Context) {
 	userID := c.GetString("userID")
 	user, err := h.Service.FindByID(userID)
 	if err != nil {
-		utils.RespondError(c, http.StatusNotFound, "user not found", err.Error())
+		utils.RespondError(c, http.StatusNotFound, "user not found", "")
 		return
 	}
 	user.PasswordHash = ""
@@ -196,7 +196,7 @@ func (h *UserHandler) UnBlockUser(c *gin.Context) {
 	targetID := c.Param("id")
 	err := h.Service.UnBlockUser(adminID, targetID)
 	if err != nil {
-		utils.RespondError(c, http.StatusForbidden, "unable to unblock user", err.Error())
+		utils.RespondError(c, http.StatusForbidden, "unable to unblock user", "")
 		return
 	}
 
@@ -207,7 +207,7 @@ func (h *UserHandler) Verified(c *gin.Context) {
 	userID := c.GetString("userID")
 	verified, err := h.Service.Verified(userID)
 	if err != nil {
-		utils.RespondError(c, http.StatusForbidden, "unable to verify user", err.Error())
+		utils.RespondError(c, http.StatusForbidden, "unable to verify user", "")
 		return
 	}
 	utils.RespondSuccess(c, "user verified", verified)

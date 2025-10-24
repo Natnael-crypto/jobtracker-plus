@@ -38,13 +38,13 @@ func (h *QuotationHandler) Create(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
 	quotation, items, err := h.service.Create(c.Request.Context(), userID, req.JobID, req.Discount, req.Tax, req.TermsAndConditions, req.Street, req.City, req.State, req.Country, req.Phone, req.Email, req.LogoUrl, req.JobTitle, req.LineItems)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 
@@ -57,7 +57,7 @@ func (h *QuotationHandler) GetByJobID(c *gin.Context) {
 
 	quotations, itemsMap, err := h.service.GetByJobID(c.Request.Context(), userID, jobID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 
@@ -77,7 +77,7 @@ func (h *QuotationHandler) GetByQuoteID(c *gin.Context) {
 	id := c.Param("id")
 	quotation, items, err := h.service.GetByQuoteID(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"quotation": quotation, "line_items": items})
@@ -89,7 +89,7 @@ func (h *QuotationHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
 
 	if err := h.service.Delete(c.Request.Context(), id, userID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.Status(http.StatusNoContent)
@@ -101,7 +101,7 @@ func (h *QuotationHandler) GetByUser(c *gin.Context) {
 	id := c.Param("job_id")
 	quotations, err := h.service.GetByUser(c.Request.Context(), userID, id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, quotations)
@@ -113,12 +113,12 @@ func (h *QuotationHandler) Update(c *gin.Context) {
 		Status string `json:"status"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 	err := h.service.UpdateStatus(c.Request.Context(), id, req.Status)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.Status(http.StatusNoContent)

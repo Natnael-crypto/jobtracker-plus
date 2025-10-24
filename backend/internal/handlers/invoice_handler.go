@@ -44,7 +44,7 @@ func (h *InvoiceHandler) Create(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
@@ -72,7 +72,7 @@ func (h *InvoiceHandler) Create(c *gin.Context) {
 		req.LineItems,
 	)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 
@@ -83,7 +83,7 @@ func (h *InvoiceHandler) GetById(c *gin.Context) {
 	id := c.Param("id")
 	invoices, itemsList, err := h.service.GetByInvoiceID(c, id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"invoice": invoices, "line_items": itemsList})
@@ -94,7 +94,7 @@ func (h *InvoiceHandler) GetByInvoiceForBusiness(c *gin.Context) {
 	id := c.Param("job_id")
 	invoice, err := h.service.GetByUserIdJobIdBusiness(c, userID, id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, invoice)
@@ -113,7 +113,7 @@ func (h *InvoiceHandler) GetAllUserInvoices(c *gin.Context) {
 
 	invoices, total, err := h.service.GetAllUserInvoices(c, userID, limit, offset)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 
@@ -131,7 +131,7 @@ func (h *InvoiceHandler) GetByInvoiceForClient(c *gin.Context) {
 	id := c.Param("job_id")
 	invoice, err := h.service.GetByUserIdJobId(c, userID, id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, invoice)
@@ -142,7 +142,7 @@ func (h *InvoiceHandler) DeleteByInvoice(c *gin.Context) {
 	id := c.Param("id")
 
 	if err := h.service.DeleteByJob(c, id, userID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 
@@ -156,12 +156,12 @@ func (h *InvoiceHandler) Update(c *gin.Context) {
 		Status string `json:"status"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 	err := h.service.UpdateStatus(c, id, req.Status, userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.Status(http.StatusNoContent)

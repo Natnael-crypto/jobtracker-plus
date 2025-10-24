@@ -29,7 +29,7 @@ func (h *EventHandler) CreateEvent(c *gin.Context) {
 		JobID       *string `json:"job_id"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
@@ -41,7 +41,7 @@ func (h *EventHandler) CreateEvent(c *gin.Context) {
 
 	event, err := h.service.Create(userID, req.Title, req.StartTime, req.EndTime, req.Description, day, req.JobID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusCreated, event)
@@ -61,7 +61,7 @@ func (h *EventHandler) UpdateEvent(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
@@ -74,7 +74,7 @@ func (h *EventHandler) UpdateEvent(c *gin.Context) {
 
 	event, err := h.service.Update(eventID, userID, req.Title, req.StartTime, req.EndTime, req.Description, day, req.JobID)
 	if err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		c.JSON(http.StatusForbidden, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, event)
@@ -91,7 +91,7 @@ func (h *EventHandler) GetEventsByDay(c *gin.Context) {
 
 	events, err := h.service.GetByDay(userID, day)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, events)
@@ -102,7 +102,7 @@ func (h *EventHandler) DeleteEvent(c *gin.Context) {
 	eventID := c.Param("id")
 
 	if err := h.service.Delete(eventID, userID); err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		c.JSON(http.StatusForbidden, gin.H{"error":  ""})
 		return
 	}
 	c.Status(http.StatusNoContent)

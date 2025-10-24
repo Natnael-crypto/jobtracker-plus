@@ -21,13 +21,13 @@ func (h *BusinessRangeHandler) UpdateBusinessRange(c *gin.Context) {
 		RangeKm int `json:"range_km" binding:"required,gt=0"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
 	br, err := h.service.UpdateBusinessRange(userID, req.RangeKm)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, br)
@@ -42,7 +42,7 @@ func (h *BusinessRangeHandler) GetBusinessRange(c *gin.Context) {
 
 	br, err := h.service.GetBusinessRange(userID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, br)

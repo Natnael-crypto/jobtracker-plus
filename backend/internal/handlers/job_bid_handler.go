@@ -23,7 +23,7 @@ func (h *JobBidHandler) CreateBid(c *gin.Context) {
 
 	bid, err := h.service.CreateBid(jobID, userID, role)
 	if err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		c.JSON(http.StatusForbidden, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusCreated, bid)
@@ -36,7 +36,7 @@ func (h *JobBidHandler) WithdrawBid(c *gin.Context) {
 	role := c.GetString("role")
 
 	if err := h.service.WithdrawBid(bidID, userID, role); err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		c.JSON(http.StatusForbidden, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "bid withdrawn"})
@@ -52,12 +52,12 @@ func (h *JobBidHandler) UpdateBidStatus(c *gin.Context) {
 		Status string `json:"status"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
 	if err := h.service.UpdateBidStatus(bidID, req.Status, role, userID); err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		c.JSON(http.StatusForbidden, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "status updated"})
@@ -69,7 +69,7 @@ func (h *JobBidHandler) GetBidsByJob(c *gin.Context) {
 	userID := c.GetString("userID")
 	bids, err := h.service.GetBidsByJob2(jobID, userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, bids)

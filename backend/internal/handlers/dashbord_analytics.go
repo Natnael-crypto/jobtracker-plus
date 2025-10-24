@@ -20,7 +20,7 @@ func (h *DashBoardAnalyticsHandler) GetBusinessDashboard(c *gin.Context) {
 	userID := c.GetString("userID")
 	dashboard, err := h.service.GetBusinessDashboard(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, dashboard)
@@ -39,7 +39,7 @@ func (h *DashBoardAnalyticsHandler) GetProfileView(c *gin.Context) {
 
 	profileViews, err := h.service.GetProfileView(userID, lastDay)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 
@@ -50,7 +50,7 @@ func (h *DashBoardAnalyticsHandler) AddProfileView(c *gin.Context) {
 	userID := c.Param("user_id")
 	err := h.service.AddProfileView(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Profile view added successfully"})

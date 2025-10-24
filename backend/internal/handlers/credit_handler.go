@@ -47,13 +47,13 @@ func (h *CreditHandler) GetCredit(c *gin.Context) {
 
 	credit, err := h.service.GetCredit(userID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
 	creditHistory, total, err := h.service.GetAllUserCreditHistory(userID, limit, offset)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
@@ -76,7 +76,7 @@ func (h *CreditHandler) GetCreditAdmin(c *gin.Context) {
 	for i, credit := range creditHistory {
 		userProfile, err := h.userProfileRep.GetByUserID(credit.UserID)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 			return
 		}
 		response[i] = CreditHistory{
@@ -88,7 +88,7 @@ func (h *CreditHandler) GetCreditAdmin(c *gin.Context) {
 	}
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 

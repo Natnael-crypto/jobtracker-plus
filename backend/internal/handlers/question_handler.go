@@ -31,7 +31,7 @@ type updateQuestionRequest struct {
 func (h *QuestionHandler) Create(c *gin.Context) {
 	var req createQuestionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 	userID := c.GetString("userID")
@@ -47,7 +47,7 @@ func (h *QuestionHandler) Create(c *gin.Context) {
 	}
 	q, err := h.svc.CreateQuestion(c.Request.Context(), userID, req.Title, req.Content, req.Category)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusCreated, q)
@@ -70,7 +70,7 @@ func (h *QuestionHandler) List(c *gin.Context) {
 
 	list, total, err := h.svc.ListQuestions(c.Request.Context(), search, category, sort, offset, limit, my == "true", userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	utils.WritePaginatedResponse(c, list, page, limit, int(total))
@@ -84,7 +84,7 @@ func (h *QuestionHandler) GetByID(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "question not found"})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, q)
@@ -93,7 +93,7 @@ func (h *QuestionHandler) GetByID(c *gin.Context) {
 func (h *QuestionHandler) Update(c *gin.Context) {
 	var req updateQuestionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 	userID := c.GetString("userID")
@@ -110,7 +110,7 @@ func (h *QuestionHandler) Update(c *gin.Context) {
 		case services.ErrUnauthorized:
 			c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
 		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		}
 		return
 	}
@@ -137,7 +137,7 @@ func (h *QuestionHandler) Delete(c *gin.Context) {
 		case services.ErrUnauthorized:
 			c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
 		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		}
 		return
 	}

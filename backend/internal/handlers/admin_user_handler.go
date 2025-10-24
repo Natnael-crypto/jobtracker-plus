@@ -37,7 +37,7 @@ func (h *AdminUserHandler) GetUsers(c *gin.Context) {
 
 	users, total, err := h.service.GetAllUsers(filters)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": ""})
 		return
 	}
 
@@ -57,7 +57,7 @@ func (h *AdminUserHandler) GetUserByIDClient(c *gin.Context) {
 	id := c.Param("id")
 	user, jobs, err := h.service.GetUserByIDClient(id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": ""})
 		return
 	}
 
@@ -76,7 +76,7 @@ func (h *AdminUserHandler) GetUserByIDBusiness(c *gin.Context) {
 	id := c.Param("id")
 	user, jobs, err := h.service.GetUserByIDBusiness(id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": ""})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{

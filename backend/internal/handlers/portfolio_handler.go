@@ -43,7 +43,7 @@ func (h *PortfolioHandler) UploadPortfolioImage(c *gin.Context) {
 	ext := file.Filename[strings.LastIndex(file.Filename, ".")+1:]
 	image, err := h.service.UploadPortfolioImage(c.Request.Context(), userID, buf, file.Header.Get("Content-Type"), ext)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
@@ -55,7 +55,7 @@ func (h *PortfolioHandler) DeletePortfolioImage(c *gin.Context) {
 	portfolioID := c.Param("portfolio_id")
 
 	if err := h.service.DeletePortfolioImage(userID, portfolioID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "portfolio image deleted"})
@@ -66,7 +66,7 @@ func (h *PortfolioHandler) GetUserPortfolio(c *gin.Context) {
 
 	urls, err := h.service.GetUserPortfolio(userID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
@@ -83,7 +83,7 @@ func (h *PortfolioHandler) GetMyUserPortfolio(c *gin.Context) {
 
 	urls, err := h.service.GetUserPortfolio(userID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 	if urls == nil {

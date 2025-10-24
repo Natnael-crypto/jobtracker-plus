@@ -44,7 +44,7 @@ func (h *CreditUsageHandler) GetCreditUsagesByUser(c *gin.Context) {
 
 	credits, total, err := h.service.GetCreditUsagesByUser(userID, search, reason, refunded, page, limit)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 
@@ -73,7 +73,7 @@ func (h *CreditUsageHandler) GetCreditUsagesByAdmin(c *gin.Context) {
 
 	credits, total, err := h.service.GetCreditUsagesAdmin(search, userID, reason, refunded, page, limit)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 

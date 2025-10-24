@@ -34,7 +34,7 @@ func (h *NotificationHandler) GetByUser(c *gin.Context) {
 
 	notifs, total, err := h.service.GetByUser(c.Request.Context(), userID, limit, offset)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 
@@ -52,7 +52,7 @@ func (h *NotificationHandler) MarkAsRead(c *gin.Context) {
 	notifID := c.Param("id")
 
 	if err := h.service.MarkAsRead(c.Request.Context(), notifID, userID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "notification marked as read"})
@@ -63,7 +63,7 @@ func (h *NotificationHandler) Delete(c *gin.Context) {
 	notifID := c.Param("id")
 
 	if err := h.service.Delete(c.Request.Context(), notifID, userID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.Status(http.StatusNoContent)
@@ -74,7 +74,7 @@ func (h *NotificationHandler) GetUnreadCount(c *gin.Context) {
 
 	count, err := h.service.GetUnreadCount(c.Request.Context(), userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 

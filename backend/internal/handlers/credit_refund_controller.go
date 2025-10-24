@@ -31,13 +31,13 @@ func (h *CreditRefundHandler) CreateRefundRequest(c *gin.Context) {
 
 	var req CreateRefundRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
 	_, err := h.service.CreateRefundRequest(userID, req.CreditUsageID, req.UserReason)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 
@@ -58,12 +58,12 @@ func (h *CreditRefundHandler) UpdateRefundStatus(c *gin.Context) {
 
 	var req UpdateRefundStatusRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
 	if err := h.service.UpdateRefundStatus(id, req.Status, req.AdminReason); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 
@@ -83,7 +83,7 @@ func (h *CreditRefundHandler) GetRefundRequestsByUser(c *gin.Context) {
 
 	refunds, total, err := h.service.GetRefundRequestsByUser(userID, page, limit)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 
@@ -106,7 +106,7 @@ func (h *CreditRefundHandler) GetRefundRequestsByAdmin(c *gin.Context) {
 
 	refunds, total, err := h.service.GetRefundRequestsByAdmin(search, userID, status, page, limit)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 
@@ -127,7 +127,7 @@ func (h *CreditRefundHandler) GetJobDetail(c *gin.Context) {
 	}
 	response, err := h.service.GetJobDetail(id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, response)

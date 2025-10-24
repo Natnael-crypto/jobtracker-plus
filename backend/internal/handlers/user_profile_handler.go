@@ -20,7 +20,7 @@ func (h *UserProfileHandler) GetProfile(c *gin.Context) {
 	userID := c.GetString("userID")
 	profile, err := h.Service.GetProfile(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	profile.ID = c.GetString("email")
@@ -35,13 +35,13 @@ func (h *UserProfileHandler) UpdateProfile(c *gin.Context) {
 		Phone     string `json:"phone_number"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
 	profile, err := h.Service.UpdateProfile(userID, req.FirstName, req.LastName, req.Phone)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 
@@ -58,14 +58,14 @@ func (h *UserProfileHandler) UploadProfileImage(c *gin.Context) {
 
 	file, err := fileHeader.Open()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	defer file.Close()
 
 	profile, err := h.Service.UploadProfileImage(context.Background(), userID, file)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 

@@ -26,7 +26,7 @@ func (h *VerificationHandler) CreateSession(c *gin.Context) {
 
 	session, err := h.Service.CreateVerificationSession(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 
@@ -43,7 +43,7 @@ func (h *VerificationHandler) Webhook(c *gin.Context) {
 	}
 
 	if err := h.Service.HandleWebhook(c.Request.Header, rawBody); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "webhook verified"})
@@ -53,7 +53,7 @@ func (h *VerificationHandler) Verify(c *gin.Context) {
 	userID := c.GetString("userID")
 	user, err := h.Service.CheckIdentityVerification(userID)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"verified": user.Verified})

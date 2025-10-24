@@ -26,13 +26,13 @@ func (h *ReviewHandler) CreateReview(c *gin.Context) {
 		UserID  string `json:"user_id" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
 	review, err := h.service.Create(jobID, reviewerID, req.Rate, req.Comment, req.UserID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusCreated, review)
@@ -47,13 +47,13 @@ func (h *ReviewHandler) UpdateReview(c *gin.Context) {
 		Comment string `json:"comment"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
 	review, err := h.service.Update(reviewID, reviewerID, req.Rate, req.Comment)
 	if err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		c.JSON(http.StatusForbidden, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, review)
@@ -64,7 +64,7 @@ func (h *ReviewHandler) GetReviewsOfUser(c *gin.Context) {
 
 	reviews, err := h.service.GetReviewsOfUser(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, reviews)
@@ -75,7 +75,7 @@ func (h *ReviewHandler) GetUserRating(c *gin.Context) {
 
 	rating, err := h.service.GetUserRating(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
@@ -89,7 +89,7 @@ func (h *ReviewHandler) GetAllUserReviews(c *gin.Context) {
 
 	reviews, err := h.service.GetReviewsOfUser(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	if reviews == nil {

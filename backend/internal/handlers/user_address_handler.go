@@ -19,7 +19,7 @@ func (h *UserAddressHandler) GetAddress(c *gin.Context) {
 	userID := c.GetString("userID")
 	address, err := h.Service.GetAddress(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, address)
@@ -35,13 +35,13 @@ func (h *UserAddressHandler) UpdateAddress(c *gin.Context) {
 		Country string `json:"country"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
 	address, err := h.Service.UpdateAddress(userID, req.Street, req.City, req.State, req.Zip, req.Country)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 

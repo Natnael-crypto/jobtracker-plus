@@ -30,7 +30,7 @@ func (h *AdminJobHandlers) GetJobs(c *gin.Context) {
 
 	jobs, total, err := h.service.GetJobs(limit, offset, search, status)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": ""})
 		return
 	}
 

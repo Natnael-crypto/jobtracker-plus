@@ -22,13 +22,13 @@ func (h *BusinessIntroductionHandler) UpdateIntroduction(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": ""})
 		return
 	}
 
 	intro, err := h.service.UpdateIntroduction(userID, req.Description)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": ""})
 		return
 	}
 	c.JSON(http.StatusOK, intro)
@@ -39,7 +39,7 @@ func (h *BusinessIntroductionHandler) GetIntroduction(c *gin.Context) {
 
 	intro, err := h.service.GetIntroduction(userID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": ""})
 		return
 	}
 	c.JSON(http.StatusOK, intro)
@@ -50,7 +50,7 @@ func (h *BusinessIntroductionHandler) GetIntroductionMe(c *gin.Context) {
 
 	intro, err := h.service.GetIntroduction(userID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": ""})
 		return
 	}
 	c.JSON(http.StatusOK, intro)

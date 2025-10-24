@@ -27,13 +27,13 @@ func (h *QualificationHandler) CreateQualification(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
 	q, err := h.service.CreateQualification(userID, req.Title, req.Institute, req.Description, req.Type, req.StartYear, req.EndYear)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusCreated, q)
@@ -51,13 +51,13 @@ func (h *QualificationHandler) UpdateQualification(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
 	q, err := h.service.UpdateQualification(userID, qualificationID, req.Title, req.Institute, req.Description, req.StartYear, req.EndYear)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, q)
@@ -68,7 +68,7 @@ func (h *QualificationHandler) DeleteQualification(c *gin.Context) {
 	qualificationID := c.Param("qualification_id")
 
 	if err := h.service.DeleteQualification(userID, qualificationID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "qualification deleted"})
@@ -79,7 +79,7 @@ func (h *QualificationHandler) GetMyQualifications(c *gin.Context) {
 
 	qualifications, err := h.service.GetQualifications(userID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, qualifications)
@@ -90,7 +90,7 @@ func (h *QualificationHandler) GetUserQualifications(c *gin.Context) {
 
 	qualifications, err := h.service.GetQualifications(userID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, qualifications)

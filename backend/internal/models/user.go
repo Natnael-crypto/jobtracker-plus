@@ -9,8 +9,8 @@ import (
 // User represents the users table.
 type User struct {
 	ID           string         `gorm:"type:varchar(255);primaryKey" json:"id"`
-	Role         string         `gorm:"type:varchar(20);not null;check:role IN ('client','business','admin')" json:"role"`
-	Email        string         `gorm:"type:varchar(255);unique;not null" json:"email"`
+	Role         string         `gorm:"type:varchar(20);not null;index;check:role IN ('client','business','admin')" json:"role"`
+	Email        string         `gorm:"type:varchar(255);unique;not null;index" json:"email"`
 	PasswordHash string         `gorm:"type:text;not null" json:"password_hash,omitempty"`
 	Status       string         `gorm:"type:varchar(20);not null;default:'active'" json:"status"`
 	CreatedAt    time.Time      `gorm:"default:current_timestamp" json:"created_at"`

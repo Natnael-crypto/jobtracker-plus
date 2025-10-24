@@ -29,7 +29,7 @@ func (h *JobImageHandler) CreateJobImage(c *gin.Context) {
 
 	jobImage, err := h.service.CreateJobImage(c.Request.Context(), jobID, file, header)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 
@@ -56,7 +56,7 @@ func (h *JobImageHandler) DeleteJobImage(c *gin.Context) {
 	userID := c.GetString("userID")
 
 	if err := h.service.DeleteJobImage(c.Request.Context(), images[0], userID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 

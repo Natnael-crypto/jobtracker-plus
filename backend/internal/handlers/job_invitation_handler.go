@@ -23,7 +23,7 @@ func (h *JobInvitationHandler) CreateInvitation(c *gin.Context) {
 
 	invite, err := h.service.CreateInvitation(jobID, businessID, role, userID)
 	if err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		c.JSON(http.StatusForbidden, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusCreated, invite)
@@ -38,12 +38,12 @@ func (h *JobInvitationHandler) UpdateInvitationStatus(c *gin.Context) {
 		Status string `json:"status"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
 	if err := h.service.UpdateInvitationStatus(inviteID, req.Status, role, userID); err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		c.JSON(http.StatusForbidden, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "status updated"})
@@ -54,7 +54,7 @@ func (h *JobInvitationHandler) GetInvitationsByUser(c *gin.Context) {
 
 	invites, err := h.service.GetInvitationsByUser(businessID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, invites)
@@ -66,7 +66,7 @@ func (h *JobInvitationHandler) GetInvitationsByJob(c *gin.Context) {
 
 	invites, err := h.service.GetInvitationsByJob(jobID, userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, invites)
@@ -79,7 +79,7 @@ func (h *JobInvitationHandler) GetInvitationsByJobUserID(c *gin.Context) {
 
 	invite, err := h.service.GetInvitationsByJobUserID(jobID, userID, clientID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, invite)
@@ -107,7 +107,7 @@ func (h *JobInvitationHandler) GetJobInvitationForUser(c *gin.Context) {
 
 	invite, err := h.service.GetByJobForUser(jobID, userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, invite)

@@ -39,13 +39,13 @@ func (h *JobHandler) CreateJob(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
 	job, err := h.service.Create(userID, role, req.Id, req.ServiceCategory, req.ServiceSpecific, req.Description, req.Headline, req.Time, req.Budget, req.Address)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
@@ -66,13 +66,13 @@ func (h *JobHandler) UpdateJob(c *gin.Context) {
 		Headline        string `json:"headline"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
 	job, err := h.service.Update(jobID, userID, req.ServiceCategory, req.ServiceSpecific, req.Description, req.Headline, req.Time, req.Budget)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, job)
@@ -87,13 +87,13 @@ func (h *JobHandler) UpdateJobStatus(c *gin.Context) {
 		Status string `json:"status" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
 	job, err := h.service.UpdateStatus(jobID, userID, req.Status)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, job)
@@ -105,7 +105,7 @@ func (h *JobHandler) DeleteJob(c *gin.Context) {
 	jobID := c.Param("id")
 
 	if err := h.service.Delete(jobID, userID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "job deleted"})
@@ -169,7 +169,7 @@ func (h *JobHandler) GetJob(c *gin.Context) {
 func (h *JobHandler) GetJobs(c *gin.Context) {
 	jobs, err := h.service.GetAll()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 
@@ -190,7 +190,7 @@ func (h *JobHandler) GetJobsForBusiness(c *gin.Context) {
 
 	jobs, total, err := h.service.GetJobForBusinessUser(userID, page, limit)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 
@@ -537,7 +537,7 @@ func (h *JobHandler) GetMyJobs(c *gin.Context) {
 
 	jobs, total, err := h.service.GetMyAllJobs(userID, page, limit)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 
@@ -556,7 +556,7 @@ func (h *JobHandler) GetMyJobStat(c *gin.Context) {
 	userID := c.GetString("userID")
 	totalJobs, hired, err := h.service.GetMyJobStat(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"total_jobs": totalJobs, "hired": hired})
@@ -567,7 +567,7 @@ func (h *JobHandler) GetClientDetailJob(c *gin.Context) {
 
 	email, phone, err := h.service.GetClientDetailJob(jobID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"email": email, "phone": phone})

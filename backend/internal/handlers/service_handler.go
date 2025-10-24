@@ -21,13 +21,13 @@ func (h *ServiceHandler) CreateService(c *gin.Context) {
 		ServiceName string `json:"service_name" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 
 	svc, err := h.service.CreateService(userID, req.ServiceName)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusCreated, svc)
@@ -38,7 +38,7 @@ func (h *ServiceHandler) DeleteService(c *gin.Context) {
 	serviceID := c.Param("service_id")
 
 	if err := h.service.DeleteService(userID, serviceID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "service deleted"})
@@ -53,7 +53,7 @@ func (h *ServiceHandler) GetServices(c *gin.Context) {
 
 	services, err := h.service.GetServices(userID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, services)
@@ -68,7 +68,7 @@ func (h *ServiceHandler) GetMyServices(c *gin.Context) {
 
 	services, err := h.service.GetServices(userID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error":  ""})
 		return
 	}
 	c.JSON(http.StatusOK, services)
