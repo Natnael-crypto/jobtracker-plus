@@ -25,7 +25,6 @@ interface LineItem {
 interface Summary {
   discount: number;
   taxRate: number;
-  requiredDepositValue: number;
 }
 
 interface BankInfo {
@@ -36,7 +35,7 @@ interface BankInfo {
   sort_code: string;
 }
 
-const QuoteForm: React.FC = () => {
+const InvoiceForm: React.FC = () => {
   const params = useParams();
   const jobId = params.id as string;
 
@@ -44,14 +43,13 @@ const QuoteForm: React.FC = () => {
   const { data: profile } = useUserProfile();
   const { data: address } = useUserAddress();
 
-  const { mutateAsync: createQuotation, isPending } = useCreateInvoice();
+  const { mutateAsync: createInvoice, isPending } = useCreateInvoice();
 
   const [items, setItems] = useState<LineItem[]>([]);
   const [terms, setTerms] = useState<string>("");
   const [summary, setSummary] = useState<Summary>({
     discount: 0,
     taxRate: 0,
-    requiredDepositValue: 0,
   });
   const [bankInfo, setBankInfo] = useState<BankInfo>({
     bank_account_name: "",
@@ -62,21 +60,25 @@ const QuoteForm: React.FC = () => {
   });
   const [dueDate, setDueDate] = useState<string>("");
 
+  // ------------------------------
+  // Calculations
+  // ------------------------------
   const subtotal = items.reduce((acc, i) => acc + i.qty * i.rate, 0);
-  const taxAmount = (subtotal - summary.discount) * summary.taxRate;
-  const total = subtotal - summary.discount + taxAmount;
+  const discountAmount = Math.max(0, (subtotal * summary.discount) / 100);
+  const taxableAmount = subtotal - discountAmount;
+  const taxAmount = taxableAmount * summary.taxRate;
+  const total = taxableAmount + taxAmount;
 
+  const formatCurrency = (val: number) =>
+    val.toLocaleString("en-GB", { style: "currency", currency: "GBP" });
+
+  // ------------------------------
+  // Item Management
+  // ------------------------------
   const addItem = () => {
     setItems((prev) => [
       ...prev,
-      {
-        id: uuidv4(),
-        product: "",
-        description: "",
-        unit: "",
-        qty: 1,
-        rate: 1,
-      },
+      { id: uuidv4(), product: "", description: "", unit: "", qty: 1, rate: 1 },
     ]);
   };
 
@@ -98,13 +100,12 @@ const QuoteForm: React.FC = () => {
     );
   };
 
-  const removeItem = (id: string) => {
+  const removeItem = (id: string) =>
     setItems((prev) => prev.filter((i) => i.id !== id));
-  };
 
-  const formatCurrency = (val: number) =>
-    val.toLocaleString("en-GB", { style: "currency", currency: "GBP" });
-
+  // ------------------------------
+  // Submit Handler
+  // ------------------------------
   const handleSubmit = async () => {
     try {
       const payload = {
@@ -112,7 +113,7 @@ const QuoteForm: React.FC = () => {
         discount: summary.discount,
         tax: summary.taxRate,
         terms_and_conditions: terms,
-        total: 0,
+        total,
         street: address?.street,
         city: address?.city,
         state: address?.state,
@@ -128,7 +129,7 @@ const QuoteForm: React.FC = () => {
         bank_routing_number: bankInfo.bank_routing_number,
         sort_code: bankInfo.sort_code,
         line_items: items.map((item) => ({
-          type: "Quotation" as "Quotation",
+          type: "Invoice" as "Invoice",
           service: item.product,
           quantity: item.qty,
           rate: item.rate,
@@ -138,42 +139,42 @@ const QuoteForm: React.FC = () => {
         })),
       };
 
-      await createQuotation(payload);
-
-      window.location.href = "/business/shortlisted";
-    } catch (error: any) {
-      console.error("Error creating quotation:", error);
+      await createInvoice(payload);
+      window.location.href = "/business/invoices";
+    } catch (error) {
+      console.error("Error creating invoice:", error);
     }
   };
 
+  // ------------------------------
+  // JSX
+  // ------------------------------
   return (
-    <div className="min-h-screen p-6 sm:p-10 md:p-12 font-sans flex justify-center">
+    <div className="min-h-screen p-6 sm:p-10 md:p-12 flex justify-center">
       <Card className="w-full p-8 border border-gray-200 shadow-none">
         <header className="flex justify-between items-start mb-10">
           <h1 className="text-xl font-bold text-gray-900">
             Invoice for {jobData?.headline ?? "Loading..."}
           </h1>
-          <div className="bg-gray-100 border border-gray-300 rounded-full flex items-center justify-center">
-            <img
-              src={profile?.image_url ?? ""}
-              alt=""
-              className="w-14 h-14 rounded-full border border-gray-200"
-            />
-          </div>
+          <img
+            src={profile?.image_url ?? ""}
+            alt="Profile"
+            className="w-14 h-14 rounded-full border border-gray-200 bg-gray-100"
+          />
         </header>
 
-        {/* Address and contact info */}
+        {/* Address Section */}
         <section className="flex border-b border-gray-200 pb-6 mb-8 text-gray-700">
           <div className="w-1/2 pr-4">
             <p className="text-sm font-semibold mb-2">Address</p>
             <p className="text-sm leading-relaxed">
               {address?.street} <br />
-              {address?.city} <br />
+              {address?.city}, {address?.state} <br />
               {address?.country}
             </p>
           </div>
           <div className="w-1/2 pl-4 border-l border-gray-200">
-            <p className="text-sm font-semibold mb-2">Contact Detail</p>
+            <p className="text-sm font-semibold mb-2">Contact</p>
             <p className="text-sm leading-relaxed">
               {profile?.phone_number} <br />
               {profile?.id}
@@ -227,8 +228,8 @@ const QuoteForm: React.FC = () => {
               <div className="col-span-6 lg:col-span-1">
                 <Input
                   type="number"
-                  value={item.qty}
                   min={1}
+                  value={item.qty}
                   onChange={(e) => updateItem(item.id, "qty", e.target.value)}
                   className="text-center"
                 />
@@ -237,8 +238,8 @@ const QuoteForm: React.FC = () => {
               <div className="col-span-6 lg:col-span-1">
                 <Input
                   type="number"
-                  value={item.rate}
                   min={1}
+                  value={item.rate}
                   onChange={(e) => updateItem(item.id, "rate", e.target.value)}
                   className="text-center"
                 />
@@ -246,9 +247,8 @@ const QuoteForm: React.FC = () => {
 
               <div className="col-span-6 lg:col-span-2 flex items-center space-x-2">
                 <Input
-                  value={formatCurrency(item.qty * item.rate)}
                   readOnly
-                  min={1}
+                  value={formatCurrency(item.qty * item.rate)}
                   className="text-right font-medium bg-gray-50 cursor-default"
                 />
                 <Trash2
@@ -274,7 +274,7 @@ const QuoteForm: React.FC = () => {
         <section className="flex flex-col lg:flex-row gap-8">
           <div className="w-full lg:w-7/12">
             <p className="text-sm font-medium text-gray-800 mb-2">
-              Terms and conditions
+              Terms and Conditions
             </p>
             <Textarea
               rows={5}
@@ -295,6 +295,7 @@ const QuoteForm: React.FC = () => {
               <span className="text-sm font-medium">Discount</span>
               <Input
                 type="number"
+                min={0}
                 value={summary.discount}
                 onChange={(e) =>
                   setSummary({ ...summary, discount: Number(e.target.value) })
@@ -303,10 +304,18 @@ const QuoteForm: React.FC = () => {
               />
             </div>
 
+            <div className="flex justify-between text-sm text-gray-600">
+              <span>Discount Amount</span>
+              <span className="font-medium text-red-500">
+                -{formatCurrency(discountAmount)}
+              </span>
+            </div>
+
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium">Tax Rate (%)</span>
               <Input
                 type="number"
+                min={0}
                 value={summary.taxRate * 100}
                 onChange={(e) =>
                   setSummary({
@@ -330,54 +339,85 @@ const QuoteForm: React.FC = () => {
           </div>
         </section>
 
-        <h1 className="mt-3 text-lg font-bold text-gray-900">Payment Method</h1>
-
-        <div className="text-sm font-medium flex justify-between">
+        {/* Bank Info */}
+        <h1 className="mt-6 text-lg font-bold text-gray-900">
+          Payment Method (optional)
+        </h1>
+        <div className="text-sm font-medium grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
-            <p className="mb-1">Bank Account Holder Name</p>
+            <p className="mb-1">Bank Account Name</p>
             <Input
               value={bankInfo.bank_account_name}
+              placeholder="John Doe"
               onChange={(e) =>
                 setBankInfo({ ...bankInfo, bank_account_name: e.target.value })
               }
             />
           </div>
-
           <div>
-            <p className="mb-1">Bank Account Number</p>
+            <p className="mb-1">Account Number</p>
             <Input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder="Enter 8-digit account number"
+              maxLength={8}
               value={bankInfo.bank_account_number}
-              onChange={(e) =>
-                setBankInfo({
-                  ...bankInfo,
-                  bank_account_number: e.target.value,
-                })
-              }
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, ""); // remove non-digits
+                if (value.length <= 8) {
+                  setBankInfo({
+                    ...bankInfo,
+                    bank_account_number: value,
+                  });
+                }
+              }}
             />
+            {bankInfo.bank_account_number.length > 0 &&
+              bankInfo.bank_account_number.length < 8 && (
+                <p className="text-red-500 text-sm mt-1">
+                  Account number must be 8 digits.
+                </p>
+              )}
           </div>
-
           <div>
             <p className="mb-1">Bank Name</p>
             <Input
               value={bankInfo.bank_name}
+              placeholder="Enter bank name"
               onChange={(e) =>
                 setBankInfo({ ...bankInfo, bank_name: e.target.value })
               }
             />
           </div>
-
           <div>
             <p className="mb-1">Sort Code</p>
             <Input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder="Enter 6-digit sort code"
+              maxLength={6}
               value={bankInfo.sort_code}
-              onChange={(e) =>
-                setBankInfo({ ...bankInfo, sort_code: e.target.value })
-              }
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, ""); // remove non-digits
+                if (value.length <= 6) {
+                  setBankInfo({
+                    ...bankInfo,
+                    sort_code: value,
+                  });
+                }
+              }}
             />
+            {bankInfo.sort_code.length > 0 && bankInfo.sort_code.length < 6 && (
+              <p className="text-red-500 text-sm mt-1">
+                Sort code must be 6 digits.
+              </p>
+            )}
           </div>
 
           <div>
-            <p className="mb-1">Bank Routing Number</p>
+            <p className="mb-1">Routing Number</p>
             <Input
               value={bankInfo.bank_routing_number}
               onChange={(e) =>
@@ -390,14 +430,13 @@ const QuoteForm: React.FC = () => {
           </div>
         </div>
 
-        <h1>Due date</h1>
-        <div className="text-sm font-medium w-100">
-          <Input
-            value={dueDate}
-            onChange={(e) => setDueDate(new Date(e.target.value).toISOString())}
-            type="date"
-          />
-        </div>
+        {/* Due Date */}
+        <h1 className="mt-6 text-lg font-bold text-gray-900">Due Date</h1>
+        <Input
+          type="date"
+          onChange={(e) => setDueDate(new Date(e.target.value).toISOString())}
+          className="mt-2 w-64"
+        />
 
         <div className="flex justify-end mt-12">
           <Button
@@ -406,7 +445,7 @@ const QuoteForm: React.FC = () => {
             disabled={isPending}
             className="shadow-md shadow-green-300/50 bg-green-500 hover:bg-green-600"
           >
-            {isPending ? "Sending..." : "Send"}
+            {isPending ? "Sending..." : "Send Invoice"}
           </Button>
         </div>
       </Card>
@@ -414,4 +453,4 @@ const QuoteForm: React.FC = () => {
   );
 };
 
-export default QuoteForm;
+export default InvoiceForm;

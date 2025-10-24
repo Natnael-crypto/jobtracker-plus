@@ -1,8 +1,6 @@
 export const dynamic = "force-dynamic";
 
 import AdminSidebar from "@/components/admin/sidebar";
-import ProfileSetupStatus from "@/components/business/ProfileSetupStatus";
-import TopNav from "@/components/business/topnav";
 import { requireRole } from "@/lib/guards";
 
 export default async function BusinessLayout({

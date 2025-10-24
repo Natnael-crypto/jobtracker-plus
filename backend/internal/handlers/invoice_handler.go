@@ -127,7 +127,7 @@ func (h *InvoiceHandler) GetAllUserInvoices(c *gin.Context) {
 }
 
 func (h *InvoiceHandler) GetByInvoiceForClient(c *gin.Context) {
-	userID := c.GetString("userID")
+	userID := c.Param("user_id")
 	id := c.Param("job_id")
 	invoice, err := h.service.GetByUserIdJobId(c, userID, id)
 	if err != nil {
@@ -149,8 +149,9 @@ func (h *InvoiceHandler) DeleteByInvoice(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-func (h *InvoiceHandler) Update(c *gin.Context) {   
+func (h *InvoiceHandler) Update(c *gin.Context) {
 	id := c.Param("id")
+	userID := c.GetString("userID")
 	var req struct {
 		Status string `json:"status"`
 	}
@@ -158,7 +159,7 @@ func (h *InvoiceHandler) Update(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := h.service.UpdateStatus(c, id, req.Status)
+	err := h.service.UpdateStatus(c, id, req.Status, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

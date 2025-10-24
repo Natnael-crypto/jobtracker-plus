@@ -95,3 +95,8 @@ func (s *CreditService) GetAllUserCreditHistory(userID string, limit, offset int
 
 	return s.repo.GetAllUserCreditHistory(userID, limit, offset)
 }
+
+func (s *CreditService) GetAllAdminCreditHistory(limit, offset int) ([]models.CreditHistory, int64, int64, error) {
+
+	return s.repo.GetAllAdminCreditHistory(limit, offset)
+}

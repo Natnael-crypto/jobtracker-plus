@@ -5,6 +5,7 @@ import (
 	"backend/internal/services"
 	"math"
 	"net/http"
+	"sort"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -42,13 +43,11 @@ func (h *JobHandler) CreateJob(c *gin.Context) {
 		return
 	}
 
-	job, err := h.service.Create(userID, role, req.Id, req.ServiceCategory, req.ServiceSpecific, req.Description, req.Headline, req.Time, req.Budget)
+	job, err := h.service.Create(userID, role, req.Id, req.ServiceCategory, req.ServiceSpecific, req.Description, req.Headline, req.Time, req.Budget, req.Address)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	_, _ = h.jobAddress.Create(userID, job.ID, req.Address.Label, req.Address.City, req.Address.State, req.Address.PostalCode, req.Address.CountryName)
 
 	c.JSON(http.StatusCreated, job)
 }
@@ -195,6 +194,10 @@ func (h *JobHandler) GetJobsForBusiness(c *gin.Context) {
 		return
 	}
 
+	sort.Slice(jobs, func(i, j int) bool {
+		return jobs[i].CreatedAt.After(jobs[j].CreatedAt)
+	})
+
 	// Custom response slice
 	var jobsResponse []map[string]interface{}
 	for _, job := range jobs {
@@ -277,6 +280,10 @@ func (h *JobHandler) GetShortlistedJobs(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch shortlisted jobs"})
 		return
 	}
+
+	sort.Slice(jobs, func(i, j int) bool {
+		return jobs[i].CreatedAt.After(jobs[j].CreatedAt)
+	})
 
 	var jobsResponse []map[string]interface{}
 	for _, job := range jobs {
@@ -369,10 +376,20 @@ func (h *JobHandler) GetAwardedJobs(c *gin.Context) {
 	total := bidTotal + inviteTotal
 
 	// --- Remove duplicate job entries by ID (if the same job appears in both) ---
-	uniqueJobs := make(map[string]models.Job)
+	uniqueJobsMap := make(map[string]models.Job)
 	for _, job := range allJobs {
-		uniqueJobs[job.ID] = job
+		uniqueJobsMap[job.ID] = job
 	}
+
+	// Convert map to slice for sorting
+	uniqueJobs := make([]models.Job, 0, len(uniqueJobsMap))
+	for _, job := range uniqueJobsMap {
+		uniqueJobs = append(uniqueJobs, job)
+	}
+
+	sort.Slice(uniqueJobs, func(i, j int) bool {
+		return uniqueJobs[i].CreatedAt.After(uniqueJobs[j].CreatedAt)
+	})
 
 	// --- Build final response payload ---
 	var jobsResponse []map[string]interface{}

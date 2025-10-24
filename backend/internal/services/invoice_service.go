@@ -115,12 +115,17 @@ func (s *InvoiceService) DeleteByJob(ctx context.Context, id, userID string) err
 	return s.repo.DeleteByJobID(ctx, id, userID)
 }
 
-func (s *InvoiceService) UpdateStatus(ctx context.Context, id, status string) error {
+func (s *InvoiceService) UpdateStatus(ctx context.Context, id, status, userID string) error {
 
 	invoices, _, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err
 	}
+
+	if invoices.UserID != userID {
+		return errors.New("unauthorized")
+	}
+
 	if status != "paid" {
 		return errors.New("invalid status")
 	}

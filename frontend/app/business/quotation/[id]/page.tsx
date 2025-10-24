@@ -23,8 +23,8 @@ interface LineItem {
 }
 
 interface Summary {
-  discount: number;
-  taxRate: number;
+  discountRate: number; // percentage
+  taxRate: number; // percentage
   requiredDepositValue: number;
 }
 
@@ -40,14 +40,17 @@ const QuoteForm: React.FC = () => {
   const [items, setItems] = useState<LineItem[]>([]);
   const [terms, setTerms] = useState<string>("");
   const [summary, setSummary] = useState<Summary>({
-    discount: 0,
+    discountRate: 0,
     taxRate: 0,
     requiredDepositValue: 0,
   });
 
+  // ---- COMPUTATIONS ----
   const subtotal = items.reduce((acc, i) => acc + i.qty * i.rate, 0);
-  const taxAmount = (subtotal - summary.discount) * summary.taxRate;
-  const total = subtotal - summary.discount + taxAmount;
+  const discountAmount = Math.max(0, (subtotal * summary.discountRate) / 100);
+  const taxableAmount = subtotal - discountAmount;
+  const taxAmount = Math.max(0, (taxableAmount * summary.taxRate) / 100);
+  const total = taxableAmount + taxAmount;
 
   const addItem = () => {
     setItems((prev) => [
@@ -84,8 +87,8 @@ const QuoteForm: React.FC = () => {
     try {
       const payload = {
         job_id: jobId,
-        discount: summary.discount,
-        tax: summary.taxRate,
+        discount: discountAmount, // send real deducted amount
+        tax: taxAmount, // send calculated tax amount
         terms_and_conditions: terms,
         total,
         street: address?.street,
@@ -259,35 +262,52 @@ const QuoteForm: React.FC = () => {
               <span className="text-sm font-medium">Subtotal</span>
               <span className="font-semibold">{formatCurrency(subtotal)}</span>
             </div>
+
+            {/* Discount Section */}
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Discount</span>
+              <span className="text-sm font-medium">Discount (%)</span>
               <Input
                 type="number"
-                value={summary.discount}
-                onChange={(e) =>
-                  setSummary({ ...summary, discount: Number(e.target.value) })
-                }
-                className="w-24 text-right"
-              />
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Tax Rate (%)</span>
-              <Input
-                type="number"
-                value={summary.taxRate * 100}
+                min={0}
+                max={100}
+                value={summary.discountRate}
                 onChange={(e) =>
                   setSummary({
                     ...summary,
-                    taxRate: Number(e.target.value) / 100,
+                    discountRate: Math.max(0, Number(e.target.value)),
                   })
                 }
                 className="w-24 text-right"
               />
             </div>
-            <div className="flex justify-between">
-              <span className="text-sm font-medium">Tax Amount</span>
-              <span className="font-semibold">{formatCurrency(taxAmount)}</span>
+            <div className="flex justify-between text-sm text-gray-600">
+              <span>Discount Amount</span>
+              <span className="font-medium text-red-500">
+                -{formatCurrency(discountAmount)}
+              </span>
             </div>
+
+            {/* Tax Section */}
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium">Tax Rate (%)</span>
+              <Input
+                type="number"
+                min={0}
+                value={summary.taxRate}
+                onChange={(e) =>
+                  setSummary({
+                    ...summary,
+                    taxRate: Math.max(0, Number(e.target.value)),
+                  })
+                }
+                className="w-24 text-right"
+              />
+            </div>
+            <div className="flex justify-between text-sm text-gray-600">
+              <span>Tax Amount</span>
+              <span>{formatCurrency(taxAmount)}</span>
+            </div>
+
             <div className="pt-2 border-t border-gray-300 flex justify-between text-lg font-bold text-gray-900">
               <span>Total</span>
               <span>{formatCurrency(total)}</span>

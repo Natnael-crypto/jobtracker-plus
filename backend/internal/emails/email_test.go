@@ -1,4 +1,4 @@
-package email
+package emails
 
 import (
 	"backend/config"
@@ -11,9 +11,9 @@ func TestSendEmail(t *testing.T) {
 
 	server := "smtp.elasticemail.com"
 	portStr := "2525"
-	username := "mail2@pollsnation.com"
-	password := "388EB08DCEA01E1EE385DB2ABB3C398AAD45"
-	from := "mail@pollsnation.com"
+	username := "mail@jobtrackplus.com"
+	password := "DD4322C4E402A1DE9C6B959F0EC1C54DF6E3"
+	from := "noreply@jobtrackplus.com"
 
 	port, err := strconv.Atoi(portStr)
 	if err != nil {
@@ -32,11 +32,11 @@ func TestSendEmail(t *testing.T) {
 		From:     from,
 	})
 
-	body := ""
+	body := GenerateHiredEmail("Natnael", "Software Engineer", "London", "http://JSIWOD")
 
 	fmt.Print("sending email...")
 
-	err = emailService.SendHTMLEmail("yohannesnatnael9@gmail.com", "Reset password", body)
+	err = emailService.SendHTMLEmail("yohannesnatnael9@gmail.com", "You’ve Successfully Hired for Your Job", body)
 	if err != nil {
 		t.Errorf("expected no error, got %v", err)
 	}

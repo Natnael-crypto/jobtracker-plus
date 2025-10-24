@@ -41,6 +41,18 @@ const sidebarMenu: MenuSection[] = [
         iconDark: "/document-dark.svg",
         href: "/admin/jobs",
       },
+      {
+        label: "Credit History",
+        icon: "/document.svg",
+        iconDark: "/document-dark.svg",
+        href: "/admin/credit-history",
+      },
+      {
+        label: "Credit Refund Requests",
+        icon: "/document.svg",
+        iconDark: "/document-dark.svg",
+        href: "/admin/credit-refund",
+      },
     ],
   },
   {

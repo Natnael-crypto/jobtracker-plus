@@ -19,8 +19,7 @@ const footerData: Column[] = [
       { label: "Trade directory", href: "/trade" },
       { label: "Post a job", href: "/post-job" },
       { label: "How it works", href: "/how-client" },
-      { label: "Cost Advice", href: "/cost-advice" },
-      { label: "FAQ and Support desk", href: "#faq-support-homeowner" },
+      { label: "FAQ Homeowners", href: "/info#faq-homeowners" },
     ],
   },
   {
@@ -29,18 +28,32 @@ const footerData: Column[] = [
       { label: "Sign up", href: "/signup/trade" },
       { label: "How it works", href: "/how-trade" },
       { label: "Getting started", href: "#getting-started" },
-      { label: "FAQ and Support desk", href: "#faq-support-tradesperson" },
+      { label: "FAQ Tradsperson", href: "/info#faq-tradespeople" },
       { label: "Advice Centre", href: "/questions" },
     ],
   },
   {
     title: "Legal",
     links: [
-      { label: "Privacy Policy", href: "#privacy-policy" },
-      { label: "Terms of service", href: "#terms-of-service" },
-      { label: "Terms of use", href: "#terms-of-use" },
+      {
+        label: "Homeowners privacy policy",
+        href: "/info#home-owners-privacy-policy",
+      },
+      {
+        label: "Homeowners terms of use",
+        href: "/info#home-owners-terms-of-use",
+      },
+      {
+        label: "Tredsperson terms of use",
+        href: "/info#tradespeople-terms-of-use",
+      },
+      {
+        label: "Tradesperson privacy policy",
+        href: "/info#tradespeople-privacy-policy",
+      },
     ],
   },
+  { title: "Resources", links: [{ label: "Articles", href: "/articles" }] },
   {
     title: "Find us on social",
     links: [
@@ -81,7 +94,7 @@ const Footer: React.FC = () => {
             </a>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-12 sm:gap-x-16 lg:gap-x-24 gap-y-10 md:grid-cols-4 md:gap-y-0 flex-grow max-w-4xl">
+          <div className="grid grid-cols-2 gap-x-12 sm:gap-x-16 lg:gap-x-24 gap-y-10 md:grid-cols-5 md:gap-y-0 flex-grow max-w-4xl">
             {footerData.map((column, colIndex) => (
               <div key={colIndex}>
                 <h3 className="text-sm font-semibold text-gray-900 tracking-tight mb-4 whitespace-nowrap">

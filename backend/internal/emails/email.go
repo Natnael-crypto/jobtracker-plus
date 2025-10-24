@@ -1,4 +1,4 @@
-package email
+package emails
 
 import (
 	"backend/config"
@@ -48,7 +48,7 @@ func (s *EmailService) SendHTMLEmail(to, subject, htmlBody string) error {
 	auth := smtp.PlainAuth("", s.config.Username, s.config.Password, s.config.Server)
 
 	msg := strings.Join([]string{
-		fmt.Sprintf("From: \"Polls Nation\" <%s>", s.config.From),
+		fmt.Sprintf("From: \"JobTracker+\" <%s>", s.config.From),
 		fmt.Sprintf("To: %s", to),
 		fmt.Sprintf("Subject: %s", subject),
 		"MIME-Version: 1.0",

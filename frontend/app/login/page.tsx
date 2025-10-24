@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import TopNav from "@/components/langing/top";
 import Footer from "@/components/langing/Footer";
 import { useLogin } from "@/hooks/useLogin";
@@ -24,12 +24,8 @@ export default function Login() {
     while (Date.now() - start < timeout) {
       try {
         const user = await getUser();
-
-        if (user?.data?.role) {
-          return user.data;
-        }
+        if (user?.data?.role) return user.data;
       } catch {}
-
       await new Promise((res) => setTimeout(res, interval));
     }
 
@@ -58,7 +54,6 @@ export default function Login() {
       }
 
       await new Promise((r) => setTimeout(r, 1000));
-
       const user = await waitForSession();
 
       if (!user?.role) {
@@ -134,12 +129,18 @@ export default function Login() {
               />
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-between items-center">
               <a
                 href="/reset-password"
                 className="text-sm text-blue-500 hover:text-black font-medium"
               >
                 Forgot password?
+              </a>
+              <a
+                href="/signup"
+                className="text-sm text-green-600 hover:text-black font-medium"
+              >
+                Don't have an account? Sign up
               </a>
             </div>
 

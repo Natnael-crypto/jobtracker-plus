@@ -47,7 +47,7 @@ func (s *PortfolioService) UploadPortfolioImage(ctx context.Context, userID stri
 	}
 
 	key := fmt.Sprintf("portfolio/%s/%s.%s", userID, uuid.NewString(), ext)
-	imageURL, err := s.s3Service.UploadProfileImage(ctx, buf, contentType, ext, userID, key)
+	imageURL, err := s.s3Service.UploadProfileImage(ctx, buf, contentType, ext, key)
 	if err != nil {
 		return nil, err
 	}

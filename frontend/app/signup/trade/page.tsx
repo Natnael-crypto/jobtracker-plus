@@ -139,14 +139,14 @@ export default function SignUp() {
               <p className="text-gray-600 text-sm">
                 I accept{" "}
                 <a
-                  href="/terms"
+                  href="/info"
                   className="text-black font-semibold hover:underline"
                 >
                   JobTracker + Terms of Use{" "}
                 </a>
                 &{" "}
                 <a
-                  href="/privacy"
+                  href="/info"
                   className="text-black font-semibold hover:underline"
                 >
                   Privacy Policy

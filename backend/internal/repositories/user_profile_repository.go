@@ -45,7 +45,7 @@ func (r *UserProfileRepository) GetUserProfile(userID string) (*models.UserProfi
 
 func (r *UserProfileRepository) GetReviews(userID string) ([]models.Review, float64, error) {
 	var reviews []models.Review
-	if err := r.DB.Where("reviewer_id = ?", userID).Find(&reviews).Error; err != nil {
+	if err := r.DB.Where("user_id = ?", userID).Find(&reviews).Error; err != nil {
 		return []models.Review{}, 0, nil
 	}
 

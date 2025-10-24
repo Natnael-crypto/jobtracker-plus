@@ -90,7 +90,7 @@ export default function ShortlistedDashboard() {
           <div className="lg:col-span-3">
             <div className="p-0 bg-white rounded-lg shadow-lg border border-gray-100">
               <div className="p-4 border-b border-gray-100">
-                <h2 className="text-lg font-semibold text-gray-900">Leads</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Jobs</h2>
               </div>
 
               <div className="divide-y divide-gray-100">

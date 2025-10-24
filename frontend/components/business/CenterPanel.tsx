@@ -18,6 +18,7 @@ export const CenterPanel = (job: JobDetailItem) => {
   }, [job]);
 
   const handleMakeBid = async (job_id: string) => {
+    console.log("making bid ", job_id);
     makeBid(job_id);
   };
   return (
@@ -29,7 +30,7 @@ export const CenterPanel = (job: JobDetailItem) => {
             {bidData ? (
               <button
                 onClick={() => handleMakeBid(job.id)}
-                className="inline-flex items-center rounded px-3 py-1 text-sm font-semibold bg-red-100 text-red-700 border"
+                className="inline-flex items-center rounded px-3 py-1 text-sm font-semibold bg-red-100 text-red-700 border hover:shadow-md transition"
               >
                 Withdrawal
               </button>

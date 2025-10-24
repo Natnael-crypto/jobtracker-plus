@@ -55,3 +55,19 @@ func (h *DashBoardAnalyticsHandler) AddProfileView(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Profile view added successfully"})
 }
+
+func (h *DashBoardAnalyticsHandler) GetClientDashboard(c *gin.Context) {
+	userID := c.GetString("userID")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	data, err := h.service.GetClientDashboard(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch dashboard data"})
+		return
+	}
+
+	c.JSON(http.StatusOK, data)
+}

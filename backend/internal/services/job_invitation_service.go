@@ -11,14 +11,15 @@ import (
 )
 
 type JobInvitationService struct {
-	repo         repositories.JobInvitationRepository
-	creditRepo   repositories.CreditRepository
-	jobRepo      repositories.JobBidRepository
-	notification *NotificationService
+	repo              repositories.JobInvitationRepository
+	creditRepo        repositories.CreditRepository
+	jobRepo           repositories.JobBidRepository
+	notification      *NotificationService
+	credit_usage_repo repositories.CreditUsageRepository
 }
 
-func NewJobInvitationService(repo repositories.JobInvitationRepository, creditRepo repositories.CreditRepository, jobRepo repositories.JobBidRepository, notification *NotificationService) *JobInvitationService {
-	return &JobInvitationService{repo: repo, creditRepo: creditRepo, jobRepo: jobRepo, notification: notification}
+func NewJobInvitationService(repo repositories.JobInvitationRepository, creditRepo repositories.CreditRepository, jobRepo repositories.JobBidRepository, notification *NotificationService, credit_usage_repo repositories.CreditUsageRepository) *JobInvitationService {
+	return &JobInvitationService{repo: repo, creditRepo: creditRepo, jobRepo: jobRepo, notification: notification, credit_usage_repo: credit_usage_repo}
 }
 
 // CreateInvitation - only clients can create invitations
@@ -101,6 +102,21 @@ func (s *JobInvitationService) UpdateInvitationStatus(inviteID, status, role, us
 			}
 
 			err = s.creditRepo.DeductCredits(invite.BusinessID, 3)
+			if err != nil {
+				return errors.New("user does not have enough credits")
+			}
+
+			creditUsage := models.CreditUsage{
+				ID:        uuid.NewString(),
+				UserID:    invite.BusinessID,
+				JobID:     invite.JobID,
+				JobTitle:  job.Headline,
+				Reason:    "invitation",
+				Credit:    -3,
+				Refunded:  false,
+				CreatedAt: time.Now(),
+			}
+			err = s.credit_usage_repo.Create(&creditUsage)
 			if err != nil {
 				return errors.New("user does not have enough credits")
 			}

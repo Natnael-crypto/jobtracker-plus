@@ -26,15 +26,7 @@ func NewJobImageService(repo repositories.JobImageRepository, s3 utils.S3Service
 }
 
 // Upload & save job image
-func (s *JobImageService) CreateJobImage(ctx context.Context, userID, jobID string, file multipart.File, header *multipart.FileHeader) (*models.JobImage, error) {
-
-	job, err := s.repo.GetJobByID(jobID)
-
-	if err == nil {
-		if job.UserID != userID {
-			return nil, errors.New("you can only update images for your own jobs")
-		}
-	}
+func (s *JobImageService) CreateJobImage(ctx context.Context, jobID string, file multipart.File, header *multipart.FileHeader) (*models.JobImage, error) {
 
 	images, err := s.repo.GetByJobID(jobID)
 	if err != nil {
@@ -58,10 +50,10 @@ func (s *JobImageService) CreateJobImage(ctx context.Context, userID, jobID stri
 	// generate S3 key
 
 	image_id := uuid.NewString()
-	key := fmt.Sprintf("job/%s/%s.%s", userID, image_id, ext)
+	key := fmt.Sprintf("job/%s.%s", image_id, ext)
 
 	// upload to S3
-	imageURL, err := s.s3Service.UploadProfileImage(ctx, buf, contentType, ext, userID, key)
+	imageURL, err := s.s3Service.UploadProfileImage(ctx, buf, contentType, ext, key)
 	if err != nil {
 		return nil, fmt.Errorf("failed to upload image: %w", err)
 	}

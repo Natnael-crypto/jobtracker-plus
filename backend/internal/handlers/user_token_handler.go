@@ -25,7 +25,6 @@ func (h *UserTokenHandler) RequestEmailVerification(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not generate code"})
 		return
 	}
-	// TODO: send email with code
 	c.JSON(http.StatusOK, gin.H{"message": "verification code sent"})
 }
 
@@ -61,7 +60,6 @@ func (h *UserTokenHandler) RequestPasswordReset(c *gin.Context) {
 		return
 	}
 	fmt.Print(code)
-	// TODO: send code via email
 	c.JSON(http.StatusOK, gin.H{"message": "reset code sent"})
 }
 

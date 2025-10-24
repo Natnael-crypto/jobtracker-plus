@@ -90,7 +90,7 @@ func (s *UserProfileService) UploadProfileImage(ctx context.Context, userID stri
 
 	key := fmt.Sprintf("profile-images/%s%s", userID, ext)
 
-	imageURL, err := s.S3Service.UploadProfileImage(ctx, buf, contentType, ext, userID, key)
+	imageURL, err := s.S3Service.UploadProfileImage(ctx, buf, contentType, ext, key)
 	if err != nil {
 		return nil, err
 	}

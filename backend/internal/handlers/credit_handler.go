@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"backend/config"
+	"backend/internal/models"
+	"backend/internal/repositories"
 	"backend/internal/services"
 	"encoding/json"
 	"fmt"
@@ -16,13 +18,21 @@ import (
 )
 
 type CreditHandler struct {
-	service      services.CreditService
-	cfg          *config.Config
-	notification *services.NotificationService
+	service        services.CreditService
+	cfg            *config.Config
+	notification   *services.NotificationService
+	userProfileRep *repositories.UserProfileRepository
 }
 
-func NewCreditHandler(service services.CreditService, cfg *config.Config, notification *services.NotificationService) *CreditHandler {
-	return &CreditHandler{service: service, cfg: cfg, notification: notification}
+type CreditHistory struct {
+	ID           string              `json:"id"`
+	CreditCharge int                 `json:"credit_change"`
+	UserProfile  *models.UserProfile `json:"user_profile"`
+	CreatedAt    string              `json:"created_at"`
+}
+
+func NewCreditHandler(service services.CreditService, cfg *config.Config, notification *services.NotificationService, userProfileRep *repositories.UserProfileRepository) *CreditHandler {
+	return &CreditHandler{service: service, cfg: cfg, notification: notification, userProfileRep: userProfileRep}
 }
 
 func (h *CreditHandler) GetCredit(c *gin.Context) {
@@ -48,6 +58,41 @@ func (h *CreditHandler) GetCredit(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"credit": credit, "creditHistory": creditHistory, "total": total})
+}
+
+func (h *CreditHandler) GetCreditAdmin(c *gin.Context) {
+
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	if limit > 50 {
+		limit = 50
+	}
+	offset := (page - 1) * limit
+
+	creditHistory, total, totalPurchased, err := h.service.GetAllAdminCreditHistory(limit, offset)
+
+	response := make([]CreditHistory, len(creditHistory))
+
+	for i, credit := range creditHistory {
+		userProfile, err := h.userProfileRep.GetByUserID(credit.UserID)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		response[i] = CreditHistory{
+			ID:           credit.ID,
+			CreditCharge: credit.CreditChange,
+			UserProfile:  userProfile,
+			CreatedAt:    credit.CreatedAt.Format("2006-01-02 15:04:05"),
+		}
+	}
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": response, "total": total, "totalPurchased": totalPurchased})
 }
 
 // POST /api/credits/buy

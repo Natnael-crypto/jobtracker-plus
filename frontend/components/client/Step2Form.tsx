@@ -146,13 +146,13 @@ export const Step2Form: React.FC<FormStepProps> = ({
   return (
     <Card title="Other details" className="h-full rounded shadow-sm relative">
       <h3 className="font-medium text-gray-800 mt-8 mb-4">
-        Enter your location
+        Enter your location (Postal Code)
       </h3>
       <div className="space-y-4 relative">
         <div>
           <input
             type="text"
-            placeholder="Address Line 1"
+            placeholder="Postal code"
             value={data.location || ""}
             onChange={handleLocationChange}
             className="w-full p-3 border rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500"

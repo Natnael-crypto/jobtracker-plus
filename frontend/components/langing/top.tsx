@@ -118,7 +118,7 @@ const TopNav = () => {
                     ? "/business/profile"
                     : user.data.role === "admin"
                     ? "/admin"
-                    : "client/profile"
+                    : "/client/profile"
                 }
               >
                 <img

@@ -1,23 +1,30 @@
 package services
 
 import (
+	"backend/internal/emails"
 	"backend/internal/models"
 	"backend/internal/repositories"
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 )
 
 type JobBidService struct {
-	repo         repositories.JobBidRepository
-	creditRepo   repositories.CreditRepository
-	notification *NotificationService
+	repo              repositories.JobBidRepository
+	creditRepo        repositories.CreditRepository
+	notification      *NotificationService
+	userRepo          repositories.UserRepository
+	emailService      *emails.EmailService
+	jobRep            repositories.JobRepository
+	jobAddress        repositories.JobAddressRepository
+	credit_usage_repo repositories.CreditUsageRepository
 }
 
-func NewJobBidService(repo repositories.JobBidRepository, creditRepo repositories.CreditRepository, notification *NotificationService) *JobBidService {
-	return &JobBidService{repo: repo, creditRepo: creditRepo, notification: notification}
+func NewJobBidService(repo repositories.JobBidRepository, creditRepo repositories.CreditRepository, notification *NotificationService, jobRep repositories.JobRepository, jobAddress repositories.JobAddressRepository, userRepo repositories.UserRepository, emailService *emails.EmailService, credit_usage_repo repositories.CreditUsageRepository) *JobBidService {
+	return &JobBidService{repo: repo, creditRepo: creditRepo, notification: notification, jobRep: jobRep, jobAddress: jobAddress, userRepo: userRepo, emailService: emailService, credit_usage_repo: credit_usage_repo}
 }
 
 // CreateBid - only business users can bid
@@ -65,7 +72,31 @@ func (s *JobBidService) CreateBid(jobID, userID, role string) (*models.JobBid, e
 	if err := s.repo.Create(bid); err != nil {
 		return nil, err
 	}
-	s.notification.Create(context.Background(), userID, "Job Bid", "You have created a bid for the job "+jobID)
+
+	job, err := s.jobRep.GetByID(jobID)
+	if err != nil {
+		return bid, nil
+	}
+
+	s.notification.Create(context.Background(), userID, "Job Bid", "You have created a bid for the job "+job.Headline)
+
+	user, err := s.userRepo.FindByID(job.UserID)
+	if err != nil {
+		return bid, nil
+	}
+	userDetail, err := s.userRepo.FindUserProfileByID(job.UserID)
+	if err != nil {
+		return bid, nil
+	}
+
+	emailTemplate := emails.GenerateJobInterestEmail(userDetail.FirstName, job.Headline, "https://jobtrackerplus.com/client/my-jobs/"+jobID)
+
+	go func() {
+		if err := s.emailService.SendHTMLEmail(user.Email, "You’ve Had Interest in Your Job", emailTemplate); err != nil {
+			fmt.Printf("Warning: Failed to send email notification: %v\n", err)
+		}
+	}()
+
 	return bid, nil
 }
 
@@ -110,6 +141,22 @@ func (s *JobBidService) UpdateBidStatus(bidID, status, role, userID string) erro
 
 	if bid.Status == "pending" && status == "shortlisted" {
 		err := s.creditRepo.DeductCredits(bid.UserID, 3)
+
+		if err != nil {
+			return errors.New("user does not have enough credits")
+		}
+
+		creditUsage := models.CreditUsage{
+			ID:        uuid.NewString(),
+			UserID:    bid.UserID,
+			JobID:     bid.JobID,
+			JobTitle:  job.Headline,
+			Reason:    "bid",
+			Credit:    -3,
+			Refunded:  false,
+			CreatedAt: time.Now(),
+		}
+		err = s.credit_usage_repo.Create(&creditUsage)
 		if err != nil {
 			return errors.New("user does not have enough credits")
 		}
@@ -135,10 +182,73 @@ func (s *JobBidService) UpdateBidStatus(bidID, status, role, userID string) erro
 
 	if status == "shortlisted" {
 		s.notification.Create(context.Background(), bid.UserID, "You’ve Been Shortlisted", "Great news! A client has shortlisted your bid for "+job.Headline+" job. Stay alert for further updates.")
+
+		jobAddress, err := s.jobAddress.GetByJobID(bid.JobID)
+		if err != nil {
+			return nil
+		}
+
+		user, err := s.userRepo.FindByID(bid.UserID)
+		if err != nil {
+			return nil
+		}
+
+		userDetail, err := s.userRepo.FindUserProfileByID(bid.UserID)
+		if err != nil {
+			return nil
+		}
+
+		emailTemplate := emails.GenerateShortlistedEmail(userDetail.FirstName, job.Headline, jobAddress.Street, "https://jobtrackerplus.com/client/my-jobs/"+job.ID)
+
+		go func() {
+			if err := s.emailService.SendHTMLEmail(user.Email, "You’ve Been Shortlisted", emailTemplate); err != nil {
+				fmt.Printf("Warning: Failed to send email notification: %v\n", err)
+			}
+		}()
 	}
 
 	if status == "hired" {
 		s.notification.Create(context.Background(), bid.UserID, "You’ve Been Awarded a Job!", "Congratulations! A client has awarded you "+job.Headline+" job. Check the job details and get started right away.")
+		jobAddress, err := s.jobAddress.GetByJobID(bid.JobID)
+		if err != nil {
+			return nil
+		}
+
+		user, err := s.userRepo.FindByID(bid.UserID)
+		if err != nil {
+			return nil
+		}
+
+		me, err := s.userRepo.FindByID(userID)
+		if err != nil {
+			return nil
+		}
+
+		userDetail, err := s.userRepo.FindUserProfileByID(bid.UserID)
+		if err != nil {
+			return nil
+		}
+
+		meDetail, err := s.userRepo.FindUserProfileByID(bid.UserID)
+		if err != nil {
+			return nil
+		}
+
+		emailTemplate := emails.GenerateHiredEmail(userDetail.FirstName, job.Headline, jobAddress.Street, "https://jobtrackerplus.com/client/my-jobs/"+job.ID)
+
+		go func() {
+			if err := s.emailService.SendHTMLEmail(user.Email, "You’ve Been Hired", emailTemplate); err != nil {
+				fmt.Printf("Warning: Failed to send email notification: %v\n", err)
+			}
+		}()
+
+		emailTemplate = emails.GenerateJobHiredEmail(meDetail.FirstName, userDetail.FirstName, job.Headline, jobAddress.Street, "https://jobtrackerplus.com/client/my-jobs/"+job.ID)
+
+		go func() {
+			if err := s.emailService.SendHTMLEmail(me.Email, "You’ve Successfully Hired for Your Job", emailTemplate); err != nil {
+				fmt.Printf("Warning: Failed to send email notification: %v\n", err)
+			}
+		}()
 	}
 
 	if status == "completed" {

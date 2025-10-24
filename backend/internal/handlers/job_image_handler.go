@@ -18,7 +18,6 @@ func NewJobImageHandler(service *services.JobImageService) *JobImageHandler {
 
 // POST /jobs/:jobID/images
 func (h *JobImageHandler) CreateJobImage(c *gin.Context) {
-	userID := c.GetString("userID")
 	jobID := c.Param("job_id")
 
 	file, header, err := c.Request.FormFile("image")
@@ -28,7 +27,7 @@ func (h *JobImageHandler) CreateJobImage(c *gin.Context) {
 	}
 	defer file.Close()
 
-	jobImage, err := h.service.CreateJobImage(c.Request.Context(), userID, jobID, file, header)
+	jobImage, err := h.service.CreateJobImage(c.Request.Context(), jobID, file, header)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

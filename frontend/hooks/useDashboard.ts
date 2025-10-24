@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   addProfileView,
   getBusinessDashboard,
+  getClientDashboard,
   getProfileViews,
 } from "@/services/dashboardApi";
 
@@ -10,6 +11,14 @@ export const useGetDashboard = () => {
   return useQuery({
     queryKey: ["useGetDashboard"],
     queryFn: getBusinessDashboard,
+    staleTime: 60_000,
+  });
+};
+
+export const useGetClientDashboard = () => {
+  return useQuery({
+    queryKey: ["useGetClientDashboard"],
+    queryFn: getClientDashboard,
     staleTime: 60_000,
   });
 };

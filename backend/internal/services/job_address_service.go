@@ -27,14 +27,6 @@ func (s *JobAddressService) Create(userID, jobID, street, city, state, zip, coun
 		return nil, errors.New("job_id is required")
 	}
 
-	job, err := s.JobRepo.GetByID(jobID)
-	if err != nil {
-		return nil, fmt.Errorf("job not found: %w", err)
-	}
-	if job.UserID != userID {
-		return nil, errors.New("not authorized to create job address")
-	}
-
 	if street == "" || city == "" || state == "" || zip == "" || country == "" {
 		return nil, errors.New("address fields are required")
 	}

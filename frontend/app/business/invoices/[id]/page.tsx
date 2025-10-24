@@ -1,8 +1,8 @@
 "use client";
 
 import { Textarea } from "@/components/ui/textarea";
-import { useGetInvoiceByID } from "@/hooks/useInvoice";
-import { GetInvoiceResponse } from "@/types/invoice";
+import { useGetInvoiceByID, useUpdateInvoice } from "@/hooks/useInvoice";
+import { GetInvoiceResponse, InvoiceStatus } from "@/types/invoice";
 import { useParams } from "next/navigation";
 import React from "react";
 
@@ -142,8 +142,13 @@ export const QuotationDetail: React.FC = () => {
   const params = useParams();
   const quotId = params.id as string;
   const { data: invoice, isLoading } = useGetInvoiceByID(quotId);
+  const { mutate: updateInvoice } = useUpdateInvoice();
 
   if (isLoading) return <div>Loading...</div>;
+
+  const handlePaid = (quotId: string, status: InvoiceStatus) => {
+    updateInvoice({ id: quotId, payload: { status } });
+  };
 
   return (
     <div className="min-h-screen p-4 sm:p-6 md:p-10 flex justify-center">
@@ -224,6 +229,18 @@ export const QuotationDetail: React.FC = () => {
               </div>
             ))}
           </div>
+
+          {/* ACTION BUTTON */}
+          {invoice?.invoice.status === "in_progress" && (
+            <div className="flex justify-start mt-8">
+              <button
+                onClick={() => handlePaid(invoice.invoice.id, "paid")}
+                className="px-6 py-3 bg-green-600 text-white text-sm font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-150"
+              >
+                Mark as Paid
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

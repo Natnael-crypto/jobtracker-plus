@@ -1,6 +1,7 @@
 package services
 
 import (
+	"backend/internal/emails"
 	"backend/internal/models"
 	"backend/internal/repositories"
 	"context"
@@ -12,14 +13,18 @@ import (
 type JobService struct {
 	repo                repositories.JobRepository
 	NotificationService *NotificationService
+	jobAddress          repositories.JobAddressRepository
+	emailService        *emails.EmailService
+	userRepo            repositories.UserRepository
+	JobAddressService   JobAddressService
 }
 
-func NewJobService(repo repositories.JobRepository, NotificationService *NotificationService) *JobService {
-	return &JobService{repo: repo, NotificationService: NotificationService}
+func NewJobService(repo repositories.JobRepository, NotificationService *NotificationService, jobAddress repositories.JobAddressRepository, emailService *emails.EmailService, userRepo repositories.UserRepository, JobAddressService JobAddressService) *JobService {
+	return &JobService{repo: repo, NotificationService: NotificationService, jobAddress: jobAddress, emailService: emailService, userRepo: userRepo, JobAddressService: JobAddressService}
 }
 
 // Create job
-func (s *JobService) Create(userID, role, id, category, specific, description, headline, t, budget string) (*models.Job, error) {
+func (s *JobService) Create(userID, role, id, category, specific, description, headline, t, budget string, Address models.AddressRequest) (*models.Job, error) {
 	if category == "" {
 		return nil, errors.New("service category is required")
 	}
@@ -41,11 +46,35 @@ func (s *JobService) Create(userID, role, id, category, specific, description, h
 		CreatedAt:       time.Now(),
 	}
 
+	_, _ = s.JobAddressService.Create(userID, id, Address.Label, Address.City, Address.State, Address.PostalCode, Address.CountryName)
+
 	if err := s.repo.Create(job); err != nil {
 		return nil, fmt.Errorf("failed to create job: %w", err)
 	}
 
 	s.NotificationService.Create(context.Background(), userID, "Your Job Has Been Created", "Your new job posting is live! Business users can now view and submit their proposals.")
+
+	jobAddress, err := s.jobAddress.GetByJobID(id)
+	if err != nil {
+		return job, nil
+	}
+
+	user, err := s.userRepo.FindByID(userID)
+	if err != nil {
+		return job, nil
+	}
+	userDetail, err := s.userRepo.FindUserProfileByID(userID)
+	if err != nil {
+		return job, nil
+	}
+	emailTemplate := emails.GenerateJobPostedEmail(userDetail.FirstName, job.Headline, jobAddress.Street, "https://jobtrackerplus.com/client/my-jobs/"+job.ID)
+
+	go func() {
+		if err := s.emailService.SendHTMLEmail(user.Email, "Thank You for Posting a Job", emailTemplate); err != nil {
+			fmt.Printf("Warning: Failed to send email notification: %v\n", err)
+		}
+	}()
+
 	return job, nil
 }
 

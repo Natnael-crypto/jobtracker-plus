@@ -1,11 +1,13 @@
 package services
 
 import (
+	"backend/internal/emails"
 	"backend/internal/models"
 	"backend/internal/repositories"
 	"crypto/rand"
 	"encoding/base32"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -13,12 +15,13 @@ import (
 )
 
 type UserTokenService struct {
-	repo     repositories.UserTokenRepository
-	userRepo repositories.UserRepository
+	repo         repositories.UserTokenRepository
+	userRepo     repositories.UserRepository
+	emailService *emails.EmailService
 }
 
-func NewUserTokenService(repo repositories.UserTokenRepository, userRepo repositories.UserRepository) *UserTokenService {
-	return &UserTokenService{repo: repo, userRepo: userRepo}
+func NewUserTokenService(repo repositories.UserTokenRepository, userRepo repositories.UserRepository, emailService *emails.EmailService) *UserTokenService {
+	return &UserTokenService{repo: repo, userRepo: userRepo, emailService: emailService}
 }
 
 // --- Helpers ---
@@ -36,6 +39,8 @@ func (s *UserTokenService) GenerateEmailVerification(userID string) (string, err
 		return "", err
 	}
 
+	
+
 	token := &models.UserToken{
 		ID:        uuid.NewString(),
 		UserID:    userID,
@@ -48,6 +53,23 @@ func (s *UserTokenService) GenerateEmailVerification(userID string) (string, err
 	if err := s.repo.Create(token); err != nil {
 		return "", err
 	}
+	user, err := s.userRepo.FindByID(token.UserID)
+	if err != nil {
+		return code, nil
+	}
+	userDetail, err := s.userRepo.FindUserProfileByID(token.UserID)
+	if err != nil {
+		return code, nil
+	}
+
+	emailTemplate := emails.GenerateEmailVerificationEmail(userDetail.FirstName, "https://jobtrackerplus.com/email-verify?token="+code)
+
+	go func() {
+		if err := s.emailService.SendHTMLEmail(user.Email, "Email Verification", emailTemplate); err != nil {
+			fmt.Printf("Warning: Failed to send email notification: %v\n", err)
+		}
+	}()
+
 	return code, nil
 }
 
@@ -111,6 +133,20 @@ func (s *UserTokenService) GeneratePasswordReset(email string) (string, error) {
 	if err := s.repo.Create(token); err != nil {
 		return "", err
 	}
+
+	userDetail, err := s.userRepo.FindUserProfileByID(token.UserID)
+	if err != nil {
+		return code, nil
+	}
+
+	emailTemplate := emails.GeneratePasswordChangedEmail(userDetail.FirstName, code)
+
+	go func() {
+		if err := s.emailService.SendHTMLEmail(user.Email, "Password Change", emailTemplate); err != nil {
+			fmt.Printf("Warning: Failed to send email notification: %v\n", err)
+		}
+	}()
+
 	return code, nil
 }
 

@@ -76,7 +76,7 @@ func (r *jobBidRepository) GetByJobID(jobID string) ([]models.JobBid, error) {
 
 func (r *jobBidRepository) GetByUserID(userID string) (int, error) {
 	var bids []models.JobBid
-	if err := r.db.Where("user_id = ?", userID).Find(&bids).Error; err != nil {
+	if err := r.db.Where("user_id = ? AND status = 'pending'", userID).Find(&bids).Error; err != nil {
 		return 0, err
 	}
 	return len(bids), nil

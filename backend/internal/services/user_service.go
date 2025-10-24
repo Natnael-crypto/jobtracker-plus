@@ -1,11 +1,13 @@
 package services
 
 import (
+	"backend/internal/emails"
 	"backend/internal/models"
 	"backend/internal/repositories"
 	"backend/internal/utils"
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -16,10 +18,11 @@ type UserService struct {
 	UserProfileService *UserProfileService
 	CreditService      *CreditService
 	Notification       *NotificationService
+	emailService       *emails.EmailService
 }
 
-func NewUserService(repo *repositories.UserRepository, JwtSecrete string, UserProfileService *UserProfileService, CreditService *CreditService, Notification *NotificationService) *UserService {
-	return &UserService{Repo: repo, JwtSecrete: JwtSecrete, UserProfileService: UserProfileService, CreditService: CreditService, Notification: Notification}
+func NewUserService(repo *repositories.UserRepository, JwtSecrete string, UserProfileService *UserProfileService, CreditService *CreditService, Notification *NotificationService, emailService *emails.EmailService) *UserService {
+	return &UserService{Repo: repo, JwtSecrete: JwtSecrete, UserProfileService: UserProfileService, CreditService: CreditService, Notification: Notification, emailService: emailService}
 }
 
 type UserVerificationStatus struct {
@@ -60,14 +63,14 @@ func (s *UserService) Register(email, password, role, first_name, last_name, pho
 	}
 
 	if err := s.Repo.CreateVerify(userVerifyEmail); err != nil {
-		return nil, err
+		return user, nil
 	}
 	if err := s.Repo.CreateVerify(userVerifyIdentity); err != nil {
-		return nil, err
+		return user, nil
 	}
 
 	if err := s.Repo.Create(user); err != nil {
-		return nil, err
+		return user, nil
 	}
 
 	s.CreditService.CreateCredit(user.ID)
@@ -81,6 +84,15 @@ func (s *UserService) Register(email, password, role, first_name, last_name, pho
 	}
 
 	s.Notification.Create(context.Background(), user.ID, "Welcome to JobTracker!", message)
+
+	emailTemplate := emails.GenerateAwaitingVerificationEmail(first_name, "https://jobtrackerplus.com/"+user.Role)
+
+	go func() {
+		if err := s.emailService.SendHTMLEmail(user.Email, "Thank You for Registering", emailTemplate); err != nil {
+			fmt.Printf("Warning: Failed to send email notification: %v\n", err)
+		}
+	}()
+
 	return user, nil
 }
 

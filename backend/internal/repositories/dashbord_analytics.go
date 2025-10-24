@@ -21,6 +21,14 @@ type BusinessDashBoard struct {
 	TotalPending      int
 }
 
+type ClientDashBoard struct {
+	ID            string
+	CompletedJobs int
+	OpenJobs      int
+	AwardedJobs   int
+	TotalResponse int
+}
+
 type JobBidStatusGroup struct {
 	Status string          `json:"status"`
 	Bids   json.RawMessage `json:"bids"`
@@ -95,6 +103,54 @@ func (r *DashBoardRepository) GetBusinessDashboard(userID string) (*BusinessDash
 
 	return &dashboard, nil
 
+}
+
+func (r *DashBoardRepository) GetClientDashboardData(userID string) (ClientDashBoard, error) {
+	var dashboard ClientDashBoard
+	dashboard.ID = userID
+
+	var openCount, awardedCount, completedCount int64
+	var totalResponses int64
+
+	// Count jobs by status
+	if err := r.db.Model(&models.Job{}).Where("user_id = ? AND status = ?", userID, "open").Count(&openCount).Error; err != nil {
+		return dashboard, err
+	}
+
+	if err := r.db.Model(&models.Job{}).Where("user_id = ? AND status = ?", userID, "awarded").Count(&awardedCount).Error; err != nil {
+		return dashboard, err
+	}
+
+	if err := r.db.Model(&models.Job{}).Where("user_id = ? AND status = ?", userID, "closed").Count(&completedCount).Error; err != nil {
+		return dashboard, err
+	}
+
+	// TotalResponse: all JobBids + JobInvitations on the user's jobs
+	var jobIDs []string
+	if err := r.db.Model(&models.Job{}).Where("user_id = ?", userID).Pluck("id", &jobIDs).Error; err != nil {
+		return dashboard, err
+	}
+
+	if len(jobIDs) > 0 {
+		// Count all bids
+		if err := r.db.Model(&models.JobBid{}).Where("job_id IN ?", jobIDs).Count(&totalResponses).Error; err != nil {
+			return dashboard, err
+		}
+
+		// Count all invitations
+		var invitationsCount int64
+		if err := r.db.Model(&models.JobInvitation{}).Where("job_id IN ?", jobIDs).Count(&invitationsCount).Error; err != nil {
+			return dashboard, err
+		}
+		totalResponses += invitationsCount
+	}
+
+	dashboard.OpenJobs = int(openCount)
+	dashboard.AwardedJobs = int(awardedCount)
+	dashboard.CompletedJobs = int(completedCount)
+	dashboard.TotalResponse = int(totalResponses)
+
+	return dashboard, nil
 }
 
 func (r *DashBoardRepository) GetProfileView(userID string, lastDay int) ([]models.ProfileView, error) {

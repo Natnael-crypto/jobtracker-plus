@@ -1,11 +1,24 @@
 // src/api/dashboardApi.ts
 import api from "@/lib/axios";
-import { BusinessDashboardDTO, ProfileViewDTO } from "../types/dashboard";
+import {
+  BusinessDashboardDTO,
+  ClientDashboard,
+  ProfileViewDTO,
+} from "../types/dashboard";
 import { ApiError } from "../types/dashboard";
 
 export const getBusinessDashboard = async (): Promise<BusinessDashboardDTO> => {
   try {
     const { data } = await api.get<BusinessDashboardDTO>("/dashboard/business");
+    return data;
+  } catch (err) {
+    throw err as ApiError;
+  }
+};
+
+export const getClientDashboard = async (): Promise<ClientDashboard> => {
+  try {
+    const { data } = await api.get<ClientDashboard>("/dashboard/client");
     return data;
   } catch (err) {
     throw err as ApiError;

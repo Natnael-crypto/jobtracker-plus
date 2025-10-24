@@ -146,13 +146,13 @@ const DashboardPage: React.FC = () => {
   const stats = dashboardData
     ? [
         {
-          title: "Completed Services",
+          title: "Completed Jobs",
           value: dashboardData.CompletedJobs,
           image: "/contract.svg",
         },
 
         {
-          title: "In Queue Services",
+          title: "In Queue Jobs",
           value: dashboardData.OpenJobs,
           image: "/sandclock-2.svg",
         },

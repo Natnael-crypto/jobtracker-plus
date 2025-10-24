@@ -2,6 +2,7 @@ package router
 
 import (
 	"backend/config"
+	"backend/internal/emails"
 	"backend/internal/handlers"
 	"backend/internal/middleware"
 	"backend/internal/repositories"
@@ -24,7 +25,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	}))
 
 	s3Service := utils.NewS3Service(utils.AWSConfig(cfg.AWS))
-	// emailService := email.NewEmailService(cfg.Email)
+	emailService := emails.NewEmailService(cfg.Email)
 
 	notification_repo := repositories.NewNotificationRepository(db)
 	notification_service := services.NewNotificationService(notification_repo)
@@ -38,10 +39,14 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 
 	userRepo := repositories.NewUserRepository(db)
 
-	credit_service := services.NewCreditService(credit_repo, *userRepo)
-	credit_handler := handlers.NewCreditHandler(*credit_service, cfg, notification_service)
+	credit_usage_repo := repositories.NewCreditUsageRepository(db)
+	credit_usage_service := services.NewCreditUsageService(credit_usage_repo)
+	credit_usage_handler := handlers.NewCreditUsageHandler(credit_usage_service)
 
-	userService := services.NewUserService(userRepo, cfg.JWT.SecretKey, user_profile_service, credit_service, notification_service)
+	credit_service := services.NewCreditService(credit_repo, *userRepo)
+	credit_handler := handlers.NewCreditHandler(*credit_service, cfg, notification_service, user_profile_repo)
+
+	userService := services.NewUserService(userRepo, cfg.JWT.SecretKey, user_profile_service, credit_service, notification_service, emailService)
 	userHandler := handlers.NewUserHandler(userService, frontendURL)
 
 	user_address_repo := repositories.NewUserAddressRepository(db)
@@ -49,7 +54,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	user_address_handler := handlers.NewUserAddressHandler(user_address_service)
 
 	user_token_repo := repositories.NewUserTokenRepository(db)
-	user_token_service := services.NewUserTokenService(*user_token_repo, *userRepo)
+	user_token_service := services.NewUserTokenService(*user_token_repo, *userRepo, emailService)
 	user_token_handler := handlers.NewUserTokenHandler(*user_token_service)
 
 	business_range_repo := repositories.NewBusinessRangeRepository(db)
@@ -73,11 +78,12 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	portfolio_handler := handlers.NewPortfolioHandler(*portfolio_service)
 
 	job_repo := repositories.NewJobRepository(db)
-	job_service := services.NewJobService(job_repo, notification_service)
 
 	job_address_repo := repositories.NewJobAddressRepository(db)
 	job_address_service := services.NewJobAddressService(job_address_repo, cfg.Geocode.APIKey, job_repo)
 	job_address_handler := handlers.NewJobAddressHandler(job_address_service)
+
+	job_service := services.NewJobService(job_repo, notification_service, job_address_repo, emailService, *userRepo, *job_address_service)
 
 	job_image_repo := repositories.NewJobImageRepository(db)
 	job_image_service := services.NewJobImageService(job_image_repo, *s3Service)
@@ -96,11 +102,11 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	review_handler := handlers.NewReviewHandler(*review_service)
 
 	job_bid_repo := repositories.NewJobBidRepository(db)
-	job_bid_service := services.NewJobBidService(job_bid_repo, credit_repo, notification_service)
+	job_bid_service := services.NewJobBidService(job_bid_repo, credit_repo, notification_service, job_repo, job_address_repo, *userRepo, emailService, *credit_usage_repo)
 	job_bid_handler := handlers.NewJobBidHandler(*job_bid_service)
 
 	job_invitation_repo := repositories.NewJobInvitationRepository(db)
-	job_invitation_service := services.NewJobInvitationService(job_invitation_repo, credit_repo, job_bid_repo, notification_service)
+	job_invitation_service := services.NewJobInvitationService(job_invitation_repo, credit_repo, job_bid_repo, notification_service, *credit_usage_repo)
 	job_invitation_handler := handlers.NewJobInvitationHandler(*job_invitation_service)
 
 	job_handler := handlers.NewJobHandler(job_service, *job_address_service, *job_image_service, *job_bid_service, *job_invitation_service)
@@ -140,7 +146,9 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	admin_jobs_service := services.NewAdminJobServices(admin_jobs_repo)
 	admin_jobs_handler := handlers.NewAdminJobHandlers(admin_jobs_service)
 
-	// TODO Add Authorization
+	credit_refund_repo := repositories.NewCreditRefundRepository(db)
+	credit_refund_service := services.NewCreditRefundService(credit_refund_repo, credit_service)
+	credit_refund_handler := handlers.NewCreditRefundHandler(credit_refund_service)
 
 	api := r.Group("/api")
 	api.GET("", func(c *gin.Context) {
@@ -227,6 +235,11 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 
 		business.POST("/verification/session", verification_handler.CreateSession) // Good
 		business.GET("/verification/verify", verification_handler.Verify)          // Good
+
+		business.GET("/credit/used", credit_usage_handler.GetCreditUsagesByUser)
+
+		business.POST("/credit/refund", credit_refund_handler.CreateRefundRequest)
+		business.GET("/credit/refund", credit_refund_handler.GetRefundRequestsByUser)
 	}
 
 	api.POST("/verification/webhook", verification_handler.Webhook)                           // Good
@@ -251,8 +264,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 
 		client.POST("/jobs/:job_id/address", job_address_handler.CreateJobAddress) // Good
 
-		client.POST("/jobs/:job_id/images", job_image_handler.CreateJobImage) // Good
-		client.DELETE("/jobs/images/:id", job_image_handler.DeleteJobImage)   // Good
+		client.DELETE("/jobs/images/:id", job_image_handler.DeleteJobImage) // Good
 
 		client.GET("/bids/:job_id", job_bid_handler.GetBidsByJob)       // Good
 		client.PUT("/bids/:id/status", job_bid_handler.UpdateBidStatus) // Good
@@ -270,6 +282,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	api.GET("/jobs/:job_id", job_handler.GetJob)
 	api.GET("/jobs/:job_id/address", job_address_handler.GetJobAddress)
 	api.GET("/jobs/:job_id/images", job_image_handler.GetJobImages)
+	api.POST("/client/jobs/:job_id/images", job_image_handler.CreateJobImage) // Good
 
 	events := api.Group("/events")
 	events.Use(middleware.AuthMiddleware(cfg.JWT.SecretKey))
@@ -368,6 +381,7 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 	{
 		dashboard.GET("/business", dashBoard_handler.GetBusinessDashboard)
 		dashboard.GET("/profile", dashBoard_handler.GetProfileView)
+		dashboard.GET("/client", dashBoard_handler.GetClientDashboard)
 	}
 
 	api.POST("/profile/:user_id", dashBoard_handler.AddProfileView)
@@ -379,6 +393,11 @@ func SetupRouter(db *gorm.DB, cfg *config.Config, frontendURL string) *gin.Engin
 		admin.GET("/users/:id/client", admin_user_handler.GetUserByIDClient)
 		admin.GET("/users/:id/business", admin_user_handler.GetUserByIDBusiness)
 		admin.GET("/jobs", admin_jobs_handler.GetJobs)
+		admin.GET("/credit/usage/all", credit_usage_handler.GetCreditUsagesByAdmin)
+		admin.GET("/credit/job/:id", credit_refund_handler.GetJobDetail)
+		admin.GET("/credit/transactions/all", credit_handler.GetCreditAdmin)
+		admin.GET("/credit/refunds/all", credit_refund_handler.GetRefundRequestsByAdmin)
+		admin.PUT("/credit/refunds/:id", credit_refund_handler.UpdateRefundStatus)
 	}
 
 	return r

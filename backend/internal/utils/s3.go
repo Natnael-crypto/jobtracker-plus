@@ -71,7 +71,7 @@ func ReadAndValidateImage(file multipart.File, maxSize int64) (*bytes.Buffer, st
 	return buf, contentType, ext, nil
 }
 
-func (s *S3Service) UploadProfileImage(ctx context.Context, buf *bytes.Buffer, contentType, ext, userID, key string) (string, error) {
+func (s *S3Service) UploadProfileImage(ctx context.Context, buf *bytes.Buffer, contentType, ext, key string) (string, error) {
 	uploader := manager.NewUploader(s.Client)
 
 	_, err := uploader.Upload(ctx, &s3.PutObjectInput{

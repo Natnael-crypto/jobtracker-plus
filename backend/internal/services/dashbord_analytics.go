@@ -28,3 +28,7 @@ func (s *DashBoardAnalytics) AddProfileView(userID string) error {
 	}
 	return nil
 }
+
+func (s *DashBoardAnalytics) GetClientDashboard(userID string) (repositories.ClientDashBoard, error) {
+	return s.repo.GetClientDashboardData(userID)
+}

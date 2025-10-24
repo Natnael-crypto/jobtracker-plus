@@ -41,6 +41,15 @@ func (r *UserRepository) FindByID(id string) (*models.User, error) {
 	return &user, err
 }
 
+func (r *UserRepository) FindUserProfileByID(id string) (*models.UserProfile, error) {
+	var userProfile models.UserProfile
+	err := r.DB.First(&userProfile, "user_id = ?", id).Error
+	if err != nil {
+		return nil, err
+	}
+	return &userProfile, err
+}
+
 func (r *UserRepository) Delete(user *models.User) error {
 	return r.DB.Unscoped().Delete(user).Error
 }

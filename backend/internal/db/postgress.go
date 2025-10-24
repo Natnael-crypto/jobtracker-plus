@@ -69,6 +69,8 @@ func NewPostgresDB(cfg *config.DatabaseConfig) (*gorm.DB, error) {
 		&models.Answer{},
 		&models.LikeConstraint{},
 		&models.ProfileView{},
+		&models.CreditUsage{},
+		&models.CreditRefundRequest{},
 	); err != nil {
 		return nil, fmt.Errorf("auto migration failed: %w", err)
 	}
